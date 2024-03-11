@@ -1,4 +1,6 @@
+import type { Nullable } from '@game/shared';
 import { Entity, type EntityId } from './entity/entity';
+import type { GameSession } from './game-session';
 
 export const MAX_ATB = 100;
 
@@ -7,6 +9,16 @@ export class ATBSystem {
 
   get activeEntity() {
     return this._activeEntity;
+  }
+
+  constructor(private session: GameSession) {}
+
+  setup(activeEntityId: Nullable<EntityId>) {
+    if (activeEntityId) {
+      this._activeEntity = this.session.entitySystem.getEntityById(activeEntityId)!;
+    } else {
+      this.tickUntilActiveEntity(this.session.entitySystem.getList());
+    }
   }
 
   getHighestActiveEntity(entities: Entity[]) {

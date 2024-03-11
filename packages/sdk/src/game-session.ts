@@ -1,17 +1,28 @@
 import EventEmitter from 'eventemitter3';
 import { EntitySystem } from './entity/entity-system';
-import { GameMap } from './map/map';
+import { GameMap, type GameMapOptions } from './map/map';
 import { ATBSystem } from './atb';
-import { PlayerSystem } from './player/player-manager';
-import type { Entity, EntityEvent, EntityEventMap } from './entity/entity';
-import type { GameAction } from './action/action';
+import { PlayerSystem, type SerializedPlayer } from './player/player-manager';
+import type {
+  Entity,
+  EntityEvent,
+  EntityEventMap,
+  EntityId,
+  SerializedEntity
+} from './entity/entity';
+import type { GameAction, SerializedAction } from './action/action';
+import type { Nullable } from '@game/shared';
 
 export type GameState = {
   id: string;
 };
 
 export type SerializedGameState = {
-  id: string;
+  map: GameMapOptions;
+  entities: Array<SerializedEntity>;
+  players: [SerializedPlayer, SerializedPlayer];
+  history: SerializedAction[];
+  activeEntityId: Nullable<EntityId>;
 };
 
 type EntityLifecycleEvent = 'created' | 'destroyed';
@@ -37,7 +48,7 @@ export class GameSession extends EventEmitter<GlobalGameEvents> {
     return new GameSession(state, false);
   }
 
-  atbSystem = new ATBSystem();
+  atbSystem = new ATBSystem(this);
 
   entitySystem = new EntitySystem(this);
 
@@ -58,6 +69,12 @@ export class GameSession extends EventEmitter<GlobalGameEvents> {
   private async setup() {
     if (this.isReady) return;
     this.isReady = true;
+
+    this.map.setup(this.initialState.map);
+    this.playerSystem.setup(this.initialState.players);
+    this.entitySystem.setup(this.initialState.entities);
+    this.atbSystem.setup(this.initialState.activeEntityId);
+
     this.emit('game:ready');
   }
 
@@ -74,7 +91,8 @@ export class GameSession extends EventEmitter<GlobalGameEvents> {
 
   serialize(): SerializedGameState {
     return {
-      id: 'id'
+      ...this.initialState
+      // history: this.history.serialize()
     };
   }
 }
