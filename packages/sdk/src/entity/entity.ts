@@ -19,10 +19,10 @@ export abstract class Entity<
 {
   readonly id: EntityId;
   public position: Vec3;
-  private emitter = mitt<TEvents>();
+  protected emitter = mitt<TEvents>();
 
   constructor(
-    private session: GameSession,
+    protected session: GameSession,
     options: SerializedEntity
   ) {
     this.id = options.id;
@@ -39,7 +39,7 @@ export abstract class Entity<
 
   abstract serialize(): TRaw;
 
-  abstract clone(): this;
+  abstract clone(): Entity<TRaw, TEvents>;
 
   equals(entity: AnyEntity) {
     return entity.id === this.id;

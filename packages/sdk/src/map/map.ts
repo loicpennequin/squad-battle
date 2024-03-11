@@ -5,7 +5,7 @@ import { cellIdToPoint } from '../utils/helpers';
 import type { GameSession } from '../game-session';
 import { DIRECTIONS_TO_DIFF, type Direction } from './map-utils';
 import { Pathfinder } from './pathfinding';
-import type { AnyEntity } from '../core/entity';
+import type { AnyEntity } from '../entity/entity';
 
 export type GameMapOptions = {
   cells: SerializedCell[];

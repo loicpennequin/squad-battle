@@ -1,6 +1,6 @@
 import { GameSession } from '../game-session';
 import type { JSONObject, Serializable } from '@game/shared';
-import type { Entity } from './entity';
+import type { AnyEntity, Entity } from '../entity/entity';
 
 export type PlayerId = string;
 
@@ -37,6 +37,6 @@ export class Player implements Serializable {
   }
 
   get team() {
-    return [] as Entity<any>[];
+    return [] as AnyEntity[];
   }
 }

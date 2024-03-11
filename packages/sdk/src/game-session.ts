@@ -1,6 +1,6 @@
 import mitt from 'mitt';
-import { EntityManager } from './core/entity-manager';
-import { PlayerManager } from './core/player-manager';
+import { EntityManager } from './entity/entity-manager';
+import { PlayerManager } from './player/player-manager';
 import { GameMap } from './map/map';
 
 export type GameState = {
