@@ -12,9 +12,16 @@ import type {
 } from './entity/entity';
 import type { GameAction, SerializedAction } from './action/action';
 import type { Nullable } from '@game/shared';
+import type { Player } from './player/player';
+import { ActionSystem } from './action/action-system';
 
 export type GameState = {
-  id: string;
+  map: Pick<GameMap, 'height' | 'width' | 'cells'>;
+  entities: Entity[];
+  players: Player[];
+  winner?: Player;
+  activeEntity: Entity;
+  history: GameAction<any>[];
 };
 
 export type SerializedGameState = {
@@ -48,6 +55,8 @@ export class GameSession extends EventEmitter<GlobalGameEvents> {
     return new GameSession(state, false);
   }
 
+  actionSystem = new ActionSystem(this);
+
   atbSystem = new ATBSystem(this);
 
   entitySystem = new EntitySystem(this);
@@ -74,13 +83,23 @@ export class GameSession extends EventEmitter<GlobalGameEvents> {
     this.playerSystem.setup(this.initialState.players);
     this.entitySystem.setup(this.initialState.entities);
     this.atbSystem.setup(this.initialState.activeEntityId);
+    await this.actionSystem.setup(this.initialState.history);
 
     this.emit('game:ready');
   }
 
   getState(): Readonly<GameState> {
     return {
-      id: 'id'
+      map: {
+        height: this.map.height,
+        width: this.map.width,
+        cells: this.map.cells.map(cell => cell.clone())
+      },
+      entities: this.entitySystem.getList().map(entity => entity.clone()),
+      players: this.playerSystem.getList().map(player => player.clone()),
+      activeEntity: this.atbSystem.activeEntity,
+      history: this.actionSystem.getHistory(),
+      winner: undefined
     };
   }
 
@@ -91,8 +110,8 @@ export class GameSession extends EventEmitter<GlobalGameEvents> {
 
   serialize(): SerializedGameState {
     return {
-      ...this.initialState
-      // history: this.history.serialize()
+      ...this.initialState,
+      history: this.actionSystem.serialize()
     };
   }
 }
