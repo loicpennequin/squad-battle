@@ -1,18 +1,27 @@
 import { z } from 'zod';
 import { GameAction, defaultActionSchema } from './action';
+import { GAME_PHASES } from '../game-session';
 
-const attackSchema = defaultActionSchema.extend({
+const schema = defaultActionSchema.extend({
   targetId: z.number()
 });
 
-export class EttackAction extends GameAction<typeof attackSchema> {
+export class EttackAction extends GameAction<typeof schema> {
   readonly name = 'attack';
 
-  protected payloadSchema = attackSchema;
+  protected payloadSchema = schema;
 
-  impl() {
+  async impl() {
+    if (this.session.phase !== GAME_PHASES.BATTLE) {
+      throw new Error('Cannot attack outside of the battle phase.');
+    }
+
+    if (!this.player.ownsActiveEntity()) {
+      throw new Error(`Player ${this.player.name} doesn't own active entity.`);
+    }
+
     const target = this.session.entitySystem.getEntityById(this.payload.targetId);
-    if (!target) return Promise.resolve();
+    if (!target) throw new Error(`Entity not found: ${this.payload.targetId}`);
 
     const entity = this.session.atbSystem.activeEntity;
     entity.dealDamage(entity.attack, target);

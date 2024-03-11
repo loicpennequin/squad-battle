@@ -2,7 +2,7 @@ import EventEmitter from 'eventemitter3';
 import { EntitySystem } from './entity/entity-system';
 import { GameMap, type GameMapOptions } from './map/map';
 import { ATBSystem } from './atb';
-import { PlayerSystem, type SerializedPlayer } from './player/player-manager';
+import { PlayerSystem } from './player/player-system';
 import type {
   Entity,
   EntityEvent,
@@ -11,9 +11,10 @@ import type {
   SerializedEntity
 } from './entity/entity';
 import type { GameAction, SerializedAction } from './action/action';
-import type { Nullable } from '@game/shared';
-import type { Player } from './player/player';
+import type { Nullable, Values } from '@game/shared';
+import type { Player, SerializedPlayer } from './player/player';
 import { ActionSystem } from './action/action-system';
+import randoomSeed from 'seedrandom';
 
 export type GameState = {
   map: Pick<GameMap, 'height' | 'width' | 'cells'>;
@@ -22,6 +23,7 @@ export type GameState = {
   winner?: Player;
   activeEntity: Entity;
   history: GameAction<any>[];
+  phase: GamePhase;
 };
 
 export type SerializedGameState = {
@@ -30,6 +32,7 @@ export type SerializedGameState = {
   players: [SerializedPlayer, SerializedPlayer];
   history: SerializedAction[];
   activeEntityId: Nullable<EntityId>;
+  phase: GamePhase;
 };
 
 type EntityLifecycleEvent = 'created' | 'destroyed';
@@ -46,14 +49,26 @@ type GlobalGameEvents = GlobalEntityEvents & {
   'game:ready': [];
 };
 
+export const GAME_PHASES = {
+  DEPLOY: 'deploy',
+  BATTLE: 'battle'
+} as const;
+export type GamePhase = Values<typeof GAME_PHASES>;
+
 export class GameSession extends EventEmitter<GlobalGameEvents> {
-  static createServerSession(state: SerializedGameState) {
-    return new GameSession(state, true);
+  static createServerSession(state: SerializedGameState, seed: string) {
+    return new GameSession(state, { seed, isAuthoritative: true });
   }
 
-  static createClientSession(state: SerializedGameState) {
-    return new GameSession(state, false);
+  static createClientSession(state: SerializedGameState, seed: string) {
+    return new GameSession(state, { seed, isAuthoritative: false });
   }
+
+  seed: string;
+
+  rng: randoomSeed.PRNG;
+
+  phase: GamePhase = GAME_PHASES.DEPLOY;
 
   actionSystem = new ActionSystem(this);
 
@@ -67,17 +82,27 @@ export class GameSession extends EventEmitter<GlobalGameEvents> {
 
   isReady = false;
 
+  private isAuthoritative: boolean;
+
   private constructor(
     private initialState: SerializedGameState,
-    readonly isAuthoritative: boolean
+    options: {
+      isAuthoritative: boolean;
+      seed: string;
+    }
   ) {
     super();
+    this.isAuthoritative = options.isAuthoritative;
+    this.seed = options.seed;
+    this.rng = randoomSeed(this.seed);
     this.setup();
   }
 
   private async setup() {
     if (this.isReady) return;
     this.isReady = true;
+
+    this.phase = this.initialState.phase;
 
     this.map.setup(this.initialState.map);
     this.playerSystem.setup(this.initialState.players);
@@ -99,6 +124,7 @@ export class GameSession extends EventEmitter<GlobalGameEvents> {
       players: this.playerSystem.getList().map(player => player.clone()),
       activeEntity: this.atbSystem.activeEntity,
       history: this.actionSystem.getHistory(),
+      phase: this.phase,
       winner: undefined
     };
   }
@@ -106,6 +132,14 @@ export class GameSession extends EventEmitter<GlobalGameEvents> {
   onReady(cb: () => void) {
     if (this.isReady) return cb();
     this.on('game:ready', cb);
+  }
+
+  transitionToBattle() {
+    this.playerSystem.getList().forEach(player => {
+      player.deployTeam();
+    });
+    this.atbSystem.tickUntilActiveEntity(this.entitySystem.getList());
+    this.phase = GAME_PHASES.BATTLE;
   }
 
   serialize(): SerializedGameState {

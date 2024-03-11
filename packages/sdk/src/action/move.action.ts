@@ -1,35 +1,37 @@
 import { z } from 'zod';
 import { GameAction, defaultActionSchema } from './action';
 import { getEntityIfOwnerMatches } from '../entity/entity-utils';
+import { GAME_PHASES } from '../game-session';
 
-const moveEventSchema = defaultActionSchema.extend({
-  entityId: z.number(),
+const schema = defaultActionSchema.extend({
   x: z.number(),
   y: z.number(),
   z: z.number()
 });
 
-export class MoveAction extends GameAction<typeof moveEventSchema> {
+export class MoveAction extends GameAction<typeof schema> {
   readonly name = 'move';
 
-  protected payloadSchema = moveEventSchema;
+  protected payloadSchema = schema;
 
-  impl() {
-    const entity = getEntityIfOwnerMatches(
-      this.session,
-      this.payload.entityId,
-      this.payload.playerId
-    );
-    if (!entity) return Promise.resolve();
+  async impl() {
+    if (this.session.phase !== GAME_PHASES.BATTLE) {
+      throw new Error('Cannot move outside of the battle phase.');
+    }
 
+    if (!this.player.ownsActiveEntity()) {
+      throw new Error(`Player ${this.player.name} doesn't own active entity.`);
+    }
+
+    const entity = this.session.atbSystem.activeEntity;
     const path = this.session.map.getPathTo(entity, this.payload);
 
-    if (!path) return Promise.resolve();
+    if (!path) throw new Error('No path found for movement.');
 
-    if (!entity.canMove(path.distance)) return Promise.resolve();
+    if (!entity.canMove(path.distance)) {
+      throw new Error(`Entity ${entity.id} cannot move to target cell.`);
+    }
 
     entity.move(path.path);
-
-    return Promise.resolve();
   }
 }

@@ -28,6 +28,13 @@ export abstract class GameAction<TSchema extends DefaultSchema> implements Seria
 
   protected abstract impl(): Promise<void>;
 
+  get player() {
+    const player = this.session.playerSystem.getPlayerById(this.payload.playerId);
+    if (!player) throw new Error(`Unknown player id: ${this.payload.playerId}`);
+
+    return player;
+  }
+
   execute() {
     const parsed = this.payloadSchema.safeParse(this.rawPayload);
 

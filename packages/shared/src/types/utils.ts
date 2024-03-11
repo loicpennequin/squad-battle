@@ -79,7 +79,8 @@ export type JSONValue =
   | number
   | boolean
   | { [x: string]: JSONValue }
-  | Array<JSONValue>;
+  | Array<JSONValue>
+  | null;
 
 export type JSONObject = { [x: string]: JSONValue };
 

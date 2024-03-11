@@ -1,10 +1,5 @@
 import { GameSession } from '../game-session';
-import { type PlayerId, Player } from './player';
-
-export type SerializedPlayer = {
-  id: PlayerId;
-  name: string;
-};
+import { type PlayerId, Player, type SerializedPlayer } from './player';
 
 export class PlayerSystem {
   private playerMap = new Map<PlayerId, Player>();
@@ -13,7 +8,7 @@ export class PlayerSystem {
 
   setup(players: [SerializedPlayer, SerializedPlayer]) {
     players
-      .map(p => new Player(this.ctx, p))
+      .map(player => new Player(this.ctx, player))
       .forEach(player => {
         this.addPlayer(player);
       });

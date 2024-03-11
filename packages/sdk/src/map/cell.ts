@@ -8,15 +8,18 @@ export type CellId = `${string}:${string}:${string}`;
 export type SerializedCell = {
   terrain: string;
   position: Point3D;
+  availableForDeploy: number;
 };
 
 export class Cell implements Serializable {
   public position: Vec3;
   public readonly terrain: string;
+  public readonly availableForDeploy: number;
 
   constructor(options: SerializedCell) {
     this.position = Vec3.fromPoint3D(options.position);
     this.terrain = options.terrain;
+    this.availableForDeploy = options.availableForDeploy;
   }
 
   clone() {
@@ -48,7 +51,8 @@ export class Cell implements Serializable {
   serialize() {
     return {
       position: this.position.serialize(),
-      terrain: this.terrain
+      terrain: this.terrain,
+      availableForDeploy: this.availableForDeploy
     };
   }
 }
