@@ -9,6 +9,7 @@
   "dependencies": {
     "@game/shared": "*",
     "@types/lodash-es": "^4.17.12",
+    "eventemitter3": "^5.0.1",
     "lodash-es": "^4.17.21",
     "mitt": "^3.0.1",
     "ts-priority-queue": "^0.1.1",

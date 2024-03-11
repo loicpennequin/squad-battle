@@ -1,7 +1,10 @@
-import mitt from 'mitt';
-import { EntityManager } from './entity/entity-manager';
-import { PlayerManager } from './player/player-manager';
+import EventEmitter from 'eventemitter3';
+import { EntitySystem } from './entity/entity-system';
 import { GameMap } from './map/map';
+import { ATBSystem } from './atb';
+import { PlayerSystem } from './player/player-manager';
+import type { Entity, EntityEvent, EntityEventMap } from './entity/entity';
+import type { GameAction } from './action/action';
 
 export type GameState = {
   id: string;
@@ -11,11 +14,21 @@ export type SerializedGameState = {
   id: string;
 };
 
-type GlobalGameEvents = {
-  'game:ready': void;
+type EntityLifecycleEvent = 'created' | 'destroyed';
+type GlobalEntityEvents = {
+  [Event in
+    | EntityEvent
+    | EntityLifecycleEvent as `entity:${Event}`]: Event extends EntityEvent
+    ? EntityEventMap[Event]
+    : Entity;
 };
 
-export class GameSession {
+type GlobalGameEvents = GlobalEntityEvents & {
+  'game:action': [GameAction<any>];
+  'game:ready': [];
+};
+
+export class GameSession extends EventEmitter<GlobalGameEvents> {
   static createServerSession(state: SerializedGameState) {
     return new GameSession(state, true);
   }
@@ -24,13 +37,13 @@ export class GameSession {
     return new GameSession(state, false);
   }
 
-  entityManager = new EntityManager(this);
+  atbSystem = new ATBSystem();
 
-  playerManager = new PlayerManager(this);
+  entitySystem = new EntitySystem(this);
+
+  playerSystem = new PlayerSystem(this);
 
   map = new GameMap(this);
-
-  emitter = mitt<GlobalGameEvents>();
 
   isReady = false;
 
@@ -38,13 +51,14 @@ export class GameSession {
     private initialState: SerializedGameState,
     readonly isAuthoritative: boolean
   ) {
+    super();
     this.setup();
   }
 
   private async setup() {
     if (this.isReady) return;
     this.isReady = true;
-    this.emitter.emit('game:ready');
+    this.emit('game:ready');
   }
 
   getState(): Readonly<GameState> {
@@ -55,7 +69,7 @@ export class GameSession {
 
   onReady(cb: () => void) {
     if (this.isReady) return cb();
-    this.emitter.on('game:ready', cb);
+    this.on('game:ready', cb);
   }
 
   serialize(): SerializedGameState {

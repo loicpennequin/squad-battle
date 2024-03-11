@@ -12,6 +12,8 @@ export type SerializedAction = {
   payload: JSONValue;
 };
 
+export type AnyGameAction = GameAction<any>;
+
 export abstract class GameAction<TSchema extends DefaultSchema> implements Serializable {
   abstract readonly name: string;
 
@@ -21,10 +23,10 @@ export abstract class GameAction<TSchema extends DefaultSchema> implements Seria
 
   constructor(
     protected rawPayload: JSONValue,
-    protected ctx: GameSession
+    protected session: GameSession
   ) {}
 
-  protected abstract impl(): void;
+  protected abstract impl(): Promise<void>;
 
   execute() {
     const parsed = this.payloadSchema.safeParse(this.rawPayload);

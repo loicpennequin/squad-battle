@@ -5,15 +5,13 @@ export type SerializedPlayer = {
   id: PlayerId;
   name: string;
 };
-export class PlayerManager {
+
+export class PlayerSystem {
   private playerMap = new Map<PlayerId, Player>();
-  private activePlayerId!: PlayerId;
 
   constructor(private ctx: GameSession) {}
 
-  setup(activePlayerId: PlayerId, players: [SerializedPlayer, SerializedPlayer]) {
-    this.activePlayerId = activePlayerId;
-
+  setup(players: [SerializedPlayer, SerializedPlayer]) {
     players
       .map(p => new Player(this.ctx, p))
       .forEach(player => {
@@ -33,10 +31,6 @@ export class PlayerManager {
     return this.getList().find(p => p.id !== id)!;
   }
 
-  getActivePlayer() {
-    return this.getPlayerById(this.activePlayerId)!;
-  }
-
   addPlayer(player: Player) {
     this.playerMap.set(player.id, player);
   }
@@ -47,11 +41,7 @@ export class PlayerManager {
 
   serialize() {
     return {
-      players: this.getList().map(player => player.serialize()) as [
-        SerializedPlayer,
-        SerializedPlayer
-      ],
-      activePlayerId: this.activePlayerId
+      players: this.getList().map(player => player.serialize())
     };
   }
 }
