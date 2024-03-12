@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { Point3D } from '@game/shared';
 import { rotate } from '../../utils/rotate-map';
+import type { RotationAngle } from '~/models/iso-camera';
 
 const {
   x,
@@ -21,17 +22,17 @@ const {
   width: number;
   offset?: Point3D;
   zIndexOffset?: number;
-  angle: 0 | 90 | 180 | 270;
+  angle: RotationAngle;
   animated: boolean;
   debug?: boolean;
 }>();
 
-const position = computed(() =>
-  toIso({ x, y, z }, angle, {
-    width: 0,
-    height: 0
-  })
-);
+const position = computed(() => {
+  return toIso({ x, y, z }, angle, {
+    width,
+    height
+  });
+});
 
 const { autoDestroyRef } = useAutoDestroy();
 
@@ -83,14 +84,14 @@ const tweened = ref({ x: containerX.value, y: containerY.value });
 
 watch([containerX, containerY], ([newX, newY]) => {
   gsap.to(tweened.value, {
-    duration: animated ? 0 : 0.5,
+    duration: animated ? 0.5 : 0,
     x: newX,
-    ease: animated ? Power0.easeOut : Power2.easeOut
+    ease: animated ? Power3.easeOut : Power0.easeOut
   });
   gsap.to(tweened.value, {
-    duration: animated ? 0 : 0.5,
+    duration: animated ? 0.5 : 0,
     y: newY,
-    ease: animated ? Power0.easeNone : Power2.easeOut
+    ease: animated ? Power3.easeOut : Power0.easeOut
   });
 });
 </script>

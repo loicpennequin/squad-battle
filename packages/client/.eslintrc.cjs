@@ -3,6 +3,6 @@ module.exports = {
   extends: ['@nuxt/eslint-config', 'daria/vue'],
   rules: {
     'vue/singleline-html-element-content-newline': 'off',
-    'import/no-unresolved': ['error', { ignore: ['\\.glsl$'] }]
+    'import/no-unresolved': ['off']
   }
 };

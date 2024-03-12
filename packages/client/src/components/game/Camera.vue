@@ -39,22 +39,42 @@ until(screenViewport)
 //   }
 // });
 
-const { cells } = map;
+const { cells, height, width } = map;
 
-const isoCells = cells.map(cell => toIso(cell.position, 0, { height: 0, width: 0 }));
-const minX = Math.min(...isoCells.map(c => c.isoX));
-const maxX = Math.max(...isoCells.map(c => c.isoX));
-const minY = Math.min(...isoCells.map(c => c.isoY - c.isoZ));
-const maxY = Math.max(...isoCells.map(c => c.isoY - c.isoZ));
-const isoBoundingRect = {
-  topLeft: { x: minX, y: minY },
-  bottomRight: { x: maxX, y: maxY }
-};
+const { camera } = useGame();
 
-const worldSize = {
-  width: isoBoundingRect.bottomRight.x - isoBoundingRect.topLeft.x + CELL_WIDTH,
-  height: isoBoundingRect.bottomRight.y - isoBoundingRect.topLeft.y + CELL_HEIGHT
-};
+useEventListener('keydown', e => {
+  if (e.repeat) return;
+
+  if (e.code === 'KeyQ') {
+    camera.value.rotateCCW();
+  } else if (e.code === 'KeyE') {
+    camera.value.rotateCW();
+  }
+});
+
+const isoCells = computed(() =>
+  cells.map(cell => toIso(cell.position, camera.value.angle, { width, height }))
+);
+const minX = computed(() => Math.min(...isoCells.value.map(c => c.isoX)));
+const maxX = computed(() => Math.max(...isoCells.value.map(c => c.isoX)));
+const minY = computed(() => Math.min(...isoCells.value.map(c => c.isoY - c.isoZ)));
+const maxY = computed(() => Math.max(...isoCells.value.map(c => c.isoY - c.isoZ)));
+const isoBoundingRect = computed(() => ({
+  topLeft: { x: minX.value, y: minY.value },
+  bottomRight: { x: maxX.value, y: maxY.value }
+}));
+
+const worldSize = computed(() => ({
+  width:
+    isoBoundingRect.value.bottomRight.x - isoBoundingRect.value.topLeft.x + CELL_WIDTH,
+  height:
+    isoBoundingRect.value.bottomRight.y - isoBoundingRect.value.topLeft.y + CELL_HEIGHT
+}));
+
+watchEffect(() => {
+  console.log(minX.value);
+});
 </script>
 
 <template>
@@ -68,7 +88,18 @@ const worldSize = {
     :disable-on-context-menu="true"
     :sortable-children="true"
   >
-    <container :sortable-children="true" :x="-minX">
+    <graphics
+      :alpha="0"
+      @render="
+        g => {
+          g.clear();
+          g.beginFill('red');
+          g.drawRect(0, 0, worldSize.width, worldSize.height);
+          g.endFill();
+        }
+      "
+    />
+    <container :sortable-children="true" :x="-minX" :y="-minY">
       <slot />
     </container>
   </viewport>

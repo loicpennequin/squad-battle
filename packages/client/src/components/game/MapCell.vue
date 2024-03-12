@@ -1,13 +1,9 @@
 <script setup lang="ts">
 import type { Cell } from '@game/sdk';
-import { useApplication } from 'vue3-pixi';
-import { CELL_WIDTH, CELL_HEIGHT } from '../../utils/constants';
 
 const { cell } = defineProps<{ cell: Cell }>();
 
-const app = useApplication();
-
-const assets = useAssets();
+const { assets, camera } = useGame();
 
 const textures = computed(() => {
   const sheet = assets.getSpritesheet(cell.terrain);
@@ -37,12 +33,12 @@ const textures = computed(() => {
     :x="cell.position.x"
     :y="cell.position.y"
     :z="cell.position.z"
-    :angle="0"
+    :angle="camera.angle"
     :height="10"
     :width="15"
   >
     <container event-mode="none">
-      <animated-sprite :textures />
+      <animated-sprite :textures="textures" />
     </container>
   </IsoPositioner>
 </template>

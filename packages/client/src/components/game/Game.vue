@@ -21,10 +21,9 @@ import cursorSummonUrl from '../../assets/cursors/cursor_summon.png';
 // }>();
 // const emit = defineEmits<GameEmits>();
 
-// const game = useGameProvider(gameSession, emit, playerId, !!isReplay);
+const game = useGameProvider();
 // const { ui, assets } = game;
 
-const assets = useAssetsProvider();
 // @ts-ignore  enable PIXI devtools
 window.PIXI = PIXI;
 gsap.registerPlugin(MotionPathPlugin);
@@ -69,8 +68,7 @@ onMounted(async () => {
 
   const app = createApp(GameView);
   app.provide(appInjectKey, pixiApp);
-  app.provide(ASSETS_INJECTION_KEY, assets);
-  // app.provide(GAME_INJECTION_KEY, game);
+  app.provide(GAME_INJECTION_KEY, game);
 
   const { appContext } = getCurrentInstance()!;
 
@@ -78,7 +76,7 @@ onMounted(async () => {
   app.config.globalProperties = parent.config.globalProperties;
   Object.assign(app._context.provides, parent._context.provides);
 
-  await assets.load();
+  await game.assets.load();
   app.mount(pixiApp.stage);
 });
 </script>

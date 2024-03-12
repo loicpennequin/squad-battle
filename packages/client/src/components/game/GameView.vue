@@ -19,7 +19,7 @@ const map = {
         y,
         z: 0
       },
-      terrain: 'ground',
+      terrain: x === 0 && y === 0 ? 'water' : 'ground',
       availableForDeploy: null
     }))
   )
