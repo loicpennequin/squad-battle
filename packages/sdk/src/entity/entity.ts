@@ -178,7 +178,7 @@ export class Entity extends EventEmitter<EntityEventMap> implements Serializable
 
   canAttack(target: Entity) {
     return (
-      this.interceptors.canAttack.getValue(true, { entity: this, target }) &&
+      this.interceptors.canAttack.getValue(this.ap > 0, { entity: this, target }) &&
       target.canBeAttacked(this)
     );
   }
@@ -257,5 +257,10 @@ export class Entity extends EventEmitter<EntityEventMap> implements Serializable
     this.emit(ENTITY_EVENTS.BEFORE_TAKE_DAMAGE, payload);
     this.hp -= amount;
     this.emit(ENTITY_EVENTS.AFTER_TAKE_DAMAGE, payload);
+  }
+
+  performAttack(target: Entity) {
+    this.dealDamage(this.attack, target);
+    this.ap--;
   }
 }

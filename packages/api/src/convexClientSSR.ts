@@ -5,7 +5,7 @@ import {
   getFunctionName
 } from 'convex/server';
 import { ConvexClient, type ConvexClientOptions, ConvexHttpClient } from 'convex/browser';
-import { type Nullable, isString } from '@hc/shared';
+import { type Nullable, isString } from '@game/shared';
 
 type AuthTokenFetcher = (args: {
   forceRefreshToken: boolean;

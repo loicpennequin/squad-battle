@@ -1,5 +1,5 @@
 {
-  "name": "@hc/api",
+  "name": "@game/api",
   "version": "1.0.0",
   "main": "./src/index.ts",
   "scripts": {

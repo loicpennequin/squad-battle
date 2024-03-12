@@ -113,6 +113,10 @@ export class GameSession extends EventEmitter<GlobalGameEvents> {
     this.emit('game:ready');
   }
 
+  dispatch(action: SerializedAction) {
+    this.actionSystem.dispatch(action);
+  }
+
   getState(): Readonly<GameState> {
     return {
       map: {

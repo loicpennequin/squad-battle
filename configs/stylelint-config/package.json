@@ -1,5 +1,5 @@
 {
-  "name": "@hc/stylelint-config",
+  "name": "@game/stylelint-config",
   "main": "index.cjs",
   "version": "0.0.0",
   "private": true,
