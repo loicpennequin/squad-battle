@@ -15,4 +15,19 @@ export type CharacterBlueprint = {
 };
 
 export const CHARACTER_BLUEPRINTS: Record<CharacterBlueprintId, CharacterBlueprint> =
-  keyBy([], 'id');
+  keyBy(
+    [
+      {
+        id: 'test',
+        spriteId: 'test',
+        maxHp: 10,
+        maxAp: 3,
+
+        attack: 2,
+        initiative: 8,
+
+        skills: []
+      }
+    ],
+    'id'
+  );

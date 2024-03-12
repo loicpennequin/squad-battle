@@ -14,14 +14,14 @@ import cursorAttackUrl from '../../assets/cursors/cursor_attack.png';
 import cursorMoveUrl from '../../assets/cursors/cursor_move.png';
 import cursorSummonUrl from '../../assets/cursors/cursor_summon.png';
 
-// const { gameSession, playerId, isReplay } = defineProps<{
-//   gameSession: GameSession;
-//   playerId: string | null;
-//   isReplay?: boolean;
-// }>();
+const { gameSession } = defineProps<{
+  gameSession: GameSession;
+  // playerId: string | null;
+  // isReplay?: boolean;
+}>();
 // const emit = defineEmits<GameEmits>();
 
-const game = useGameProvider();
+const game = useGameProvider(gameSession);
 // const { ui, assets } = game;
 
 // @ts-ignore  enable PIXI devtools
@@ -76,8 +76,10 @@ onMounted(async () => {
   app.config.globalProperties = parent.config.globalProperties;
   Object.assign(app._context.provides, parent._context.provides);
 
-  await game.assets.load();
-  app.mount(pixiApp.stage);
+  gameSession.onReady(async () => {
+    await game.assets.load();
+    app.mount(pixiApp.stage);
+  });
 });
 </script>
 

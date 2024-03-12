@@ -12,6 +12,6 @@ export class IsoCamera {
   }
 
   rotateCCW() {
-    this._angle = ((this._angle + 360 + 90) % 360) as RotationAngle;
+    this._angle = ((this._angle + 360 - 90) % 360) as RotationAngle;
   }
 }

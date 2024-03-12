@@ -2,35 +2,12 @@
 import { useApplication } from 'vue3-pixi';
 import { type Viewport } from 'pixi-viewport';
 import { Cell } from '@game/sdk';
-// eslint-disable-next-line import/no-unresolved
 import { CELL_HEIGHT, CELL_WIDTH } from '@/utils/constants';
 
 const app = useApplication();
-const { map } = defineProps<{ map: { width: number; height: number; cells: Cell[] } }>();
 const screenViewport = shallowRef<Viewport>();
 
-until(screenViewport)
-  .not.toBe(undefined)
-  .then(() => {
-    screenViewport.value
-      ?.drag({
-        mouseButtons: 'left'
-      })
-      .pinch()
-      .decelerate({ friction: 0.88 })
-      .wheel({ smooth: 3, percent: 0.05 })
-      .mouseEdges({
-        distance: 10,
-        speed: 18,
-        allowButtons: true
-      })
-      .clamp({
-        direction: 'all'
-      })
-      .clampZoom({ minScale: 1, maxScale: 3 })
-      .zoomPercent(1, false);
-    // .moveCenter(center.isoX, cente r.isoY);
-  });
+const { state } = useGame();
 
 // watchEffect(() => {
 //   if (gameObjectsLayer.value) {
@@ -38,8 +15,6 @@ until(screenViewport)
 //     gameObjectsLayer.value.sortableChildren = true;
 //   }
 // });
-
-const { cells, height, width } = map;
 
 const { camera } = useGame();
 
@@ -54,7 +29,9 @@ useEventListener('keydown', e => {
 });
 
 const isoCells = computed(() =>
-  cells.map(cell => toIso(cell.position, camera.value.angle, { width, height }))
+  state.value.map.cells.map(cell =>
+    toIso(cell.position, camera.value.angle, state.value.map)
+  )
 );
 const minX = computed(() => Math.min(...isoCells.value.map(c => c.isoX)));
 const maxX = computed(() => Math.max(...isoCells.value.map(c => c.isoX)));
@@ -65,16 +42,46 @@ const isoBoundingRect = computed(() => ({
   bottomRight: { x: maxX.value, y: maxY.value }
 }));
 
+const WORLD_PADDING = {
+  x: CELL_WIDTH * 2,
+  y: CELL_HEIGHT * 10
+};
 const worldSize = computed(() => ({
   width:
-    isoBoundingRect.value.bottomRight.x - isoBoundingRect.value.topLeft.x + CELL_WIDTH,
+    isoBoundingRect.value.bottomRight.x -
+    isoBoundingRect.value.topLeft.x +
+    WORLD_PADDING.x,
   height:
-    isoBoundingRect.value.bottomRight.y - isoBoundingRect.value.topLeft.y + CELL_HEIGHT
+    isoBoundingRect.value.bottomRight.y -
+    isoBoundingRect.value.topLeft.y +
+    WORLD_PADDING.y
 }));
 
-watchEffect(() => {
-  console.log(minX.value);
-});
+until(screenViewport)
+  .not.toBe(undefined)
+  .then(() => {
+    screenViewport.value
+      ?.drag({
+        mouseButtons: 'left'
+      })
+      .pinch()
+      .decelerate({ friction: 0.88 })
+      .wheel({ smooth: 3, percent: 0.05 })
+      // .mouseEdges({
+      //   distance: 10,
+      //   speed: 18,
+      //   allowButtons: true,
+      // })
+      .clamp({
+        direction: 'all'
+      })
+      .clampZoom({ minScale: 2, maxScale: 3 })
+      .zoomPercent(0, false)
+      .moveCenter(
+        isoCells.value[0].isoX + WORLD_PADDING.x * 3,
+        isoCells.value[0].isoY + WORLD_PADDING.y / 2
+      );
+  });
 </script>
 
 <template>
@@ -99,7 +106,11 @@ watchEffect(() => {
         }
       "
     />
-    <container :sortable-children="true" :x="-minX" :y="-minY">
+    <container
+      :sortable-children="true"
+      :x="-minX + WORLD_PADDING.x / 2"
+      :y="-minY + WORLD_PADDING.y / 2"
+    >
       <slot />
     </container>
   </viewport>

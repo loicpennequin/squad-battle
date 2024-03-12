@@ -1,36 +1,20 @@
 <script setup lang="ts">
-import { Cell } from '@game/sdk';
-
+import sky1 from '@/assets/backgrounds/sky-1.png';
 // watchEffect(() => {
 //   if (gameObjectsLayer.value) {
 //     gameObjectsLayer.value.group.enableSort = true;
 //     gameObjectsLayer.value.sortableChildren = true;
 //   }
 // });
-const WIDTH = 15;
-const HEIGHT = 10;
-const map = {
-  height: HEIGHT,
-  width: WIDTH,
-  cells: Array.from({ length: HEIGHT }, (_, y) =>
-    Array.from({ length: WIDTH }, (_, x) => ({
-      position: {
-        x,
-        y,
-        z: 0
-      },
-      terrain: x === 0 && y === 0 ? 'water' : 'ground',
-      availableForDeploy: null
-    }))
-  )
-    .flat()
-    .map(c => new Cell(c))
-};
+const { state } = useGame();
 </script>
 
 <template>
-  <Camera :map="map">
-    <MapCell v-for="cell in map.cells" :key="cell.id" :cell="cell" />
+  <Sky />
+  <Camera>
+    <MapCell v-for="cell in state.map.cells" :key="cell.id" :cell="cell" />
+
+    <Entity v-for="entity in state.entities" :key="entity.id" :entity="entity" />
   </Camera>
 
   <Fps />

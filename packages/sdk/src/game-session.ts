@@ -82,7 +82,7 @@ export class GameSession extends EventEmitter<GlobalGameEvents> {
 
   isReady = false;
 
-  private isAuthoritative: boolean;
+  readonly isAuthoritative: boolean;
 
   private constructor(
     private initialState: SerializedGameState,

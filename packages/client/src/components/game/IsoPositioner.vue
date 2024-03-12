@@ -118,7 +118,7 @@ watch([containerX, containerY], ([newX, newY]) => {
       :anchor="0.5"
       event-mode="none"
     >
-      x:{{ x }} y:{{ y }} z{{ z }}{{ '\n' }}z-index:{{ zIndex.toFixed(1) }}
+      {{ zIndex.toFixed(1) }}
     </text>
   </container>
 </template>

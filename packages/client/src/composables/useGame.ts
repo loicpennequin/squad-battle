@@ -1,4 +1,5 @@
 // import type { Values, UnionToIntersection } from '@game/shared';
+import type { GameSession, GameState } from '@game/sdk';
 import type { AssetsContext } from './useAssets';
 import type { IsoCameraContext } from './useIsoCamera';
 
@@ -20,15 +21,36 @@ export type GameEmits = {
 export type GameContext = {
   camera: IsoCameraContext;
   assets: AssetsContext;
+  session: GameSession;
+  state: Ref<GameState>;
 };
 
 export const GAME_INJECTION_KEY = Symbol('game') as InjectionKey<GameContext>;
 
-export const useGameProvider = () => {
+export const useGameProvider = (session: GameSession) => {
   const camera = useIsoCameraProvider();
   const assets = useAssetsProvider();
 
-  const ctx: GameContext = { camera, assets };
+  const state = ref<GameState>(session.getState()) as Ref<GameState>;
+
+  session.on('game:action', () => {
+    const newState = session.getState();
+    state.value = newState;
+
+    // if (action.name === 'END_TURN') {
+    //   context.ui.selectedEntity.value = null;
+    //   context.ui.targetMode.value = null;
+    // }
+    // if (action.name === 'END_GAME') {
+    //   emit('end', { winner: session.playerManager.getPlayerById(session.winner!)! });
+    // }
+  });
+
+  onUnmounted(() => {
+    session.removeAllListeners();
+  });
+
+  const ctx: GameContext = { camera, assets, session, state };
   provide(GAME_INJECTION_KEY, ctx);
 
   return ctx;

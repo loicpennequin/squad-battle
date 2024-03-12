@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { GameSession, type SerializedGameState } from '@game/sdk';
+
 definePageMeta({
   name: 'Sandbox',
   pageTransition: {
@@ -6,12 +8,65 @@ definePageMeta({
     mode: 'out-in'
   }
 });
+
+const WIDTH = 15;
+const HEIGHT = 10;
+const state: SerializedGameState = {
+  activeEntityId: null,
+  history: [],
+  phase: 'battle',
+  map: {
+    height: HEIGHT,
+    width: WIDTH,
+    cells: Array.from({ length: HEIGHT }, (_, y) =>
+      Array.from({ length: WIDTH }, (_, x) => ({
+        position: {
+          x,
+          y,
+          z: 0
+        },
+        terrain: x === 0 && y === 0 ? 'water' : 'ground',
+        availableForDeploy: null
+      }))
+    ).flat()
+  },
+  entities: [
+    {
+      atbSeed: 0.001,
+      blueprintId: 'test',
+      playerId: '1',
+      id: 1,
+      position: { x: 0, y: 1, z: 0 }
+    }
+  ],
+  players: [
+    {
+      id: '1',
+      name: 'Player 1',
+      team: [],
+      deployment: [
+        {
+          characterId: 'test',
+          position: { x: 0, y: 0, z: 0 }
+        }
+      ]
+    },
+    {
+      id: '2',
+      name: 'Player 2',
+      team: [],
+      deployment: []
+    }
+  ]
+};
+
+const session = GameSession.createClientSession(state, 'seed');
 </script>
 
 <template>
   <div class="overflow-hidden">
     <ClientOnly>
-      <Game />
+      <Game :game-session="session" />
       <template #fallback><div /></template>
     </ClientOnly>
   </div>

@@ -14,6 +14,8 @@ export class ATBSystem {
   constructor(private session: GameSession) {}
 
   setup(activeEntityId: Nullable<EntityId>) {
+    if (this.session.phase === 'deploy') return;
+
     if (activeEntityId) {
       this._activeEntity = this.session.entitySystem.getEntityById(activeEntityId)!;
     } else {
@@ -29,16 +31,16 @@ export class ATBSystem {
   }
 
   tickUntilActiveEntity(entities: Entity[], dryRun?: boolean) {
+    if (!entities.length) {
+      throw new Error('Cannot tick until active entitity if there are no entities.');
+    }
     let activeEntity = this.getHighestActiveEntity(entities);
-
     while (!activeEntity) {
       entities.forEach(e => {
         e.atb += e.initiative;
       });
-
       activeEntity = this.getHighestActiveEntity(entities);
     }
-
     if (!dryRun) {
       this._activeEntity = activeEntity;
     }

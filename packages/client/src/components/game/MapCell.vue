@@ -3,7 +3,7 @@ import type { Cell } from '@game/sdk';
 
 const { cell } = defineProps<{ cell: Cell }>();
 
-const { assets, camera } = useGame();
+const { assets, camera, state } = useGame();
 
 const textures = computed(() => {
   const sheet = assets.getSpritesheet(cell.terrain);
@@ -34,11 +34,11 @@ const textures = computed(() => {
     :y="cell.position.y"
     :z="cell.position.z"
     :angle="camera.angle"
-    :height="10"
-    :width="15"
+    :height="state.map.height"
+    :width="state.map.width"
   >
     <container event-mode="none">
-      <animated-sprite :textures="textures" />
+      <animated-sprite :textures="textures" :anchor="0.5" />
     </container>
   </IsoPositioner>
 </template>

@@ -6,7 +6,6 @@ export const createSpritesheetFrameObject = (
   spritesheet: Spritesheet
 ): FrameObject[] => {
   const frames = spritesheet.data.animations?.[name];
-  // @ts-expect-error
   const textures = spritesheet.animations[name];
   if (!frames || !textures) throw new Error(`unknown animation: ${name}`);
 

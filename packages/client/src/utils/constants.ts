@@ -1,2 +1,2 @@
-export const CELL_HEIGHT = 48;
-export const CELL_WIDTH = 64;
+export const CELL_WIDTH = 96;
+export const CELL_HEIGHT = 64;

@@ -1,11 +1,11 @@
-import { Vec3, isDefined, isString } from '@game/shared';
+import { Vec3, isString } from '@game/shared';
 import type { Point3D } from '../types';
 import { Cell, type CellId, type SerializedCell } from './cell';
 import { cellIdToPoint } from '../utils/helpers';
 import type { GameSession } from '../game-session';
 import { DIRECTIONS_TO_DIFF, type Direction } from './map-utils';
 import { Pathfinder } from './pathfinding';
-import type { AnyEntity } from '../entity/entity';
+import type { Entity } from '../entity/entity';
 
 export type GameMapOptions = {
   cells: SerializedCell[];
@@ -98,7 +98,7 @@ export class GameMap {
     return new Pathfinder(this.session, boundaries).getDistanceMap(point);
   }
 
-  getPathTo(entity: AnyEntity, point: Point3D, maxDistance?: number) {
+  getPathTo(entity: Entity, point: Point3D, maxDistance?: number) {
     const boundaries = maxDistance
       ? ([
           Vec3.sub(point, { x: maxDistance, y: maxDistance, z: maxDistance }),
