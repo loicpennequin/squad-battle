@@ -1,1 +1,1 @@
-# @hc/sdk
+# @game/sdk

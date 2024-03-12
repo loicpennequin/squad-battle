@@ -1,24 +1,31 @@
+/* 
+ theme colors
+ These colors gets picked up by the uno config at compile time to generate dynamic colors 
+ They MUST start with --color- AND end with -hsl. They also need to be hsl values NON COMMA SEPARATED
+ You don't need to use these directly in your css files (see below)
+*/
 :root {
-  --color-text-1-hsl: var(--gray-3-hsl);
-  --color-text-2-hsl: var(--gray-5-hsl);
-  --color-text-3-hsl: var(--gray-6-hsl);
+  --color-text-1-hsl: var(--gray-11-hsl);
+  --color-text-2-hsl: var(--gray-8-hsl);
+  --color-text-3-hsl: var(--gray-7-hsl);
 
-  --color-surface-1-hsl: var(--gray-9-hsl);
-  --color-surface-2-hsl: var(--gray-10-hsl);
-  --color-surface-3-hsl: var(--gray-11-hsl);
-  --color-surface-4-hsl: var(--gray-12-hsl);
+  --color-surface-1-hsl: var(--gray-1-hsl);
+  --color-surface-2-hsl: var(--gray-2-hsl);
+  --color-surface-3-hsl: var(--gray-3-hsl);
+  --color-surface-4-hsl: var(--gray-4-hsl);
 
-  --color-primary-hsl: var(--yellow-4-hsl);
-  --color-primary-hover-hsl: var(--yellow-5-hsl);
-  --color-text-on-primary-hsl: var(--gray-11-hsl);
+  --color-primary-hsl: var(--gray-11-hsl);
+  --color-primary-hover-hsl: var(--gray-8-hsl);
+  --color-text-on-primary-hsl: var(--gray-0-hsl);
 
-  --color-error-hsl: var(--red-9-hsl);
-  --color-error-hover-hsl: var(--red-10-hsl);
+  --color-error-hsl: var(--red-10-hsl);
+  --color-error-hover-hsl: var(--red-11-hsl);
+  --color-text-on-error-hsl: var(--gray-0-hsl);
 
-  --color-disabled-hsl: var(--gray-8-hsl);
+  --color-disabled-hsl: var(--gray-3-hsl);
   --color-text-on-disabled-hsl: var(--gray-6-hsl);
 
-  --color-link-hsl: var(--violet-5-hsl);
+  --color-link-hsl: var(--violet-7-hsl);
 }
 
 /* Theme color Dark mode overrideq */
@@ -70,8 +77,8 @@ html.dark {
   --disabled: hsl(var(--color-disabled-hsl));
   --text-on-disabled: hsl(var(--color-text-on-disabled-hsl));
 
-  --border-dimmed: hsl(var(--gray-0-hsl) / 0.35);
-  --border: hsl(var(--gray-0-hsl) / 0.5);
+  --border-dimmed: hsl(var(--gray-11-hsl) / 0.15);
+  --border: hsl(var(--gray-11-hsl) / 0.4);
 
   --link: hsl(var(--color-link-hsl));
 
@@ -115,6 +122,22 @@ html.dark {
   --size-lg: 64rem;
   --size-xl: 90rem;
   --size-xxl: 120rem;
+
+  --fancy-bg: linear-gradient(130deg, hsl(200 100% 60%), hsl(320 100% 60%)),
+    hsl(250 30% 10%);
+
+  --fancy-bg-transparency: linear-gradient(
+      130deg,
+      hsl(200 100% 35% / 0.3),
+      hsl(320 100% 35% / 0.3)
+    ),
+    hsl(250 30% 0% / 0.6);
+  --fancy-border: solid var(--border-size-2) hsl(var(--color-primary-hsl) / 0.5);
+}
+
+html.dark {
+  --border-dimmed: hsl(var(--gray-0-hsl) / 0.35);
+  --border: hsl(var(--gray-0-hsl) / 0.5);
 
   /* used internally by open-props box-shadows */
   --shadow-color: 210 7% 90%;

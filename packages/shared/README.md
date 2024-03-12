@@ -1,1 +1,1 @@
-# @hc/shared
+# @game/shared
