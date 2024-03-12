@@ -1,12 +1,12 @@
 import { deg2Rad } from '@game/shared';
-import type { Point3D } from '@game/sdk';
+import type { Point3D } from '@game/shared';
 
 export type IsoPoint = {
   isoX: number;
   isoY: number;
   isoZ: number;
 };
-const TILE_WIDTH = CELL_SIZE;
+const TILE_WIDTH = CELL_WIDTH;
 const TILE_HEIGHT = TILE_WIDTH / 2;
 
 export interface TransformOptions {
@@ -20,19 +20,14 @@ export function applyTransforms(
   y: number,
   z: number,
   angle: number,
-  gridSize: { width: number; height: number }
+  offset: { width: number; height: number }
 ): Point3D {
   const cosRotation = Math.cos(angle);
   const sinRotation = Math.sin(angle);
 
-  const centered = {
-    x: x - gridSize.width,
-    y: y - gridSize.height
-  };
-
   const rotated = {
-    x: centered.x * cosRotation - centered.y * sinRotation,
-    y: centered.x * sinRotation + centered.y * cosRotation
+    x: x * cosRotation - y * sinRotation,
+    y: x * sinRotation + y * cosRotation
   };
 
   const iso = {
@@ -40,11 +35,13 @@ export function applyTransforms(
     y: (rotated.x + rotated.y) / 2
   };
 
-  return {
-    x: iso.x * TILE_WIDTH,
-    y: iso.y * TILE_HEIGHT,
+  const final = {
+    x: iso.x * TILE_WIDTH + offset.width,
+    y: iso.y * TILE_HEIGHT + offset.height,
     z: z * TILE_HEIGHT
   };
+
+  return final;
 }
 export const toIso = (
   { x, y, z }: Point3D,

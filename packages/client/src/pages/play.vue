@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import bg from '../assets/backgrounds/palace.jpg';
+import bg from '../assets/backgrounds/spire.jpg';
 
 definePageMeta({
   middleware: ['auth'],
@@ -11,10 +11,8 @@ definePageMeta({
 
 <template>
   <div :style="{ '--bg': `url(${bg})` }" class="root">
-    <div>
-      <UsernameModal />
-      <NuxtPage />
-    </div>
+    <UsernameModal />
+    <NuxtPage />
   </div>
 </template>
 
@@ -24,11 +22,5 @@ definePageMeta({
   background: var(--bg);
   background-attachment: fixed;
   background-size: cover;
-
-  > div {
-    height: 100%;
-    min-height: 100vh;
-    background: var(--fancy-bg-transparency);
-  }
 }
 </style>

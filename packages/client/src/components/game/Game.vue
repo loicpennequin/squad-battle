@@ -13,7 +13,6 @@ import cursorDisabledUrl from '../../assets/cursors/cursor_disabled.png';
 import cursorAttackUrl from '../../assets/cursors/cursor_attack.png';
 import cursorMoveUrl from '../../assets/cursors/cursor_move.png';
 import cursorSummonUrl from '../../assets/cursors/cursor_summon.png';
-import surfaceBg from '../../assets/ui{m}/surface-bg.png';
 
 // const { gameSession, playerId, isReplay } = defineProps<{
 //   gameSession: GameSession;
@@ -25,6 +24,7 @@ import surfaceBg from '../../assets/ui{m}/surface-bg.png';
 // const game = useGameProvider(gameSession, emit, playerId, !!isReplay);
 // const { ui, assets } = game;
 
+const assets = useAssetsProvider();
 // @ts-ignore  enable PIXI devtools
 window.PIXI = PIXI;
 gsap.registerPlugin(MotionPathPlugin);
@@ -69,6 +69,7 @@ onMounted(async () => {
 
   const app = createApp(GameView);
   app.provide(appInjectKey, pixiApp);
+  app.provide(ASSETS_INJECTION_KEY, assets);
   // app.provide(GAME_INJECTION_KEY, game);
 
   const { appContext } = getCurrentInstance()!;
@@ -77,12 +78,9 @@ onMounted(async () => {
   app.config.globalProperties = parent.config.globalProperties;
   Object.assign(app._context.provides, parent._context.provides);
 
-  // await assets.load();
+  await assets.load();
   app.mount(pixiApp.stage);
 });
-
-const surfaceBgVar = useCssVar('--surface-bg');
-surfaceBgVar.value = `url(${surfaceBg})`;
 </script>
 
 <template>

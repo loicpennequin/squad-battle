@@ -46,5 +46,3 @@ definePageMeta({
   }
 }
 </style>
-
-<style scoped lang="postcss"></style>

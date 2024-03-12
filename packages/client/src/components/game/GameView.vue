@@ -1,14 +1,37 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import { Cell } from '@game/sdk';
+
+// watchEffect(() => {
+//   if (gameObjectsLayer.value) {
+//     gameObjectsLayer.value.group.enableSort = true;
+//     gameObjectsLayer.value.sortableChildren = true;
+//   }
+// });
+const WIDTH = 15;
+const HEIGHT = 10;
+const map = {
+  height: HEIGHT,
+  width: WIDTH,
+  cells: Array.from({ length: HEIGHT }, (_, y) =>
+    Array.from({ length: WIDTH }, (_, x) => ({
+      position: {
+        x,
+        y,
+        z: 0
+      },
+      terrain: 'ground',
+      availableForDeploy: null
+    }))
+  )
+    .flat()
+    .map(c => new Cell(c))
+};
+</script>
 
 <template>
-  <graphics
-    @render="
-      g => {
-        g.clear();
-        g.beginFill(0xff0000);
-        g.drawRect(100, 100, 200, 200);
-        g.endFill();
-      }
-    "
-  />
+  <Camera :map="map">
+    <MapCell v-for="cell in map.cells" :key="cell.id" :cell="cell" />
+  </Camera>
+
+  <Fps />
 </template>

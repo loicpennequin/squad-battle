@@ -1,4 +1,4 @@
-import { Vec3, type Serializable } from '@game/shared';
+import { Vec3, type Nullable, type Serializable } from '@game/shared';
 import type { Point3D } from '../types';
 import { pointToCellId } from '../utils/helpers';
 // import { Tile } from './tile';
@@ -8,13 +8,13 @@ export type CellId = `${string}:${string}:${string}`;
 export type SerializedCell = {
   terrain: string;
   position: Point3D;
-  availableForDeploy: number;
+  availableForDeploy: Nullable<number>;
 };
 
 export class Cell implements Serializable {
   public position: Vec3;
   public readonly terrain: string;
-  public readonly availableForDeploy: number;
+  public readonly availableForDeploy: Nullable<number>;
 
   constructor(options: SerializedCell) {
     this.position = Vec3.fromPoint3D(options.position);
@@ -52,7 +52,7 @@ export class Cell implements Serializable {
     return {
       position: this.position.serialize(),
       terrain: this.terrain,
-      availableForDeploy: this.availableForDeploy
+      availableForDeploy: this.availableForDeploy ?? null
     };
   }
 }
