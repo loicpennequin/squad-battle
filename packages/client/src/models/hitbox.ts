@@ -13,8 +13,20 @@ export class Hitbox {
     });
   }
 
-  static from(shapeData: number[][], offset = 0) {
-    const polygons = shapeData.map(p => new Polygon(p.map(p => p - offset)));
+  static from(
+    shapeData: number[][],
+    source: { width: number; height: number },
+    anchor = 0
+  ) {
+    const polygons = shapeData.map(
+      p =>
+        new Polygon(
+          p.map((p, i) => {
+            const offset = i % 2 === 0 ? source.width * anchor : source.height * anchor;
+            return p - offset;
+          })
+        )
+    );
 
     return new Hitbox(polygons);
   }

@@ -6,7 +6,7 @@ const schema = defaultActionSchema.extend({
   targetId: z.number()
 });
 
-export class EttackAction extends GameAction<typeof schema> {
+export class AttackAction extends GameAction<typeof schema> {
   readonly name = 'attack';
 
   protected payloadSchema = schema;

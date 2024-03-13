@@ -3,6 +3,7 @@ import { useApplication } from 'vue3-pixi';
 import { type Viewport } from 'pixi-viewport';
 import { Cell } from '@game/sdk';
 import { CELL_HEIGHT, CELL_WIDTH } from '@/utils/constants';
+import { pointToIndex } from '@game/shared';
 
 const app = useApplication();
 const screenViewport = shallowRef<Viewport>();
@@ -44,7 +45,7 @@ const isoBoundingRect = computed(() => ({
 
 const WORLD_PADDING = {
   x: CELL_WIDTH * 2,
-  y: CELL_HEIGHT * 10
+  y: CELL_HEIGHT * 5
 };
 const worldSize = computed(() => ({
   width:
@@ -56,6 +57,23 @@ const worldSize = computed(() => ({
     isoBoundingRect.value.topLeft.y +
     WORLD_PADDING.y
 }));
+
+const containerOffset = computed(() => ({
+  x: -minX.value + WORLD_PADDING.x / 2,
+  y: -minY.value + WORLD_PADDING.y / 2
+}));
+
+const isoCenter = computed(() => {
+  const i = pointToIndex(
+    {
+      x: Math.round(state.value.map.width / 2),
+      y: Math.round(state.value.map.height / 2)
+    },
+    state.value.map.width
+  );
+
+  return isoCells.value[i];
+});
 
 until(screenViewport)
   .not.toBe(undefined)
@@ -78,8 +96,8 @@ until(screenViewport)
       .clampZoom({ minScale: 2, maxScale: 3 })
       .zoomPercent(0, false)
       .moveCenter(
-        isoCells.value[0].isoX + WORLD_PADDING.x * 3,
-        isoCells.value[0].isoY + WORLD_PADDING.y / 2
+        isoCenter.value.isoX + containerOffset.value.x,
+        isoCenter.value.isoY + containerOffset.value.y - CELL_HEIGHT / 2
       );
   });
 </script>
@@ -106,11 +124,7 @@ until(screenViewport)
         }
       "
     />
-    <container
-      :sortable-children="true"
-      :x="-minX + WORLD_PADDING.x / 2"
-      :y="-minY + WORLD_PADDING.y / 2"
-    >
+    <container :sortable-children="true" v-bind="containerOffset">
       <slot />
     </container>
   </viewport>

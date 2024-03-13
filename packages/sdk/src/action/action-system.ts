@@ -1,6 +1,11 @@
 import { GameAction, type DefaultSchema, type SerializedAction } from './action';
 import { GameSession } from '../game-session';
 import type { Constructor, Serializable } from '@game/shared';
+import { AttackAction } from './attack.action';
+import { DeployAction } from './deploy.action';
+import { EndTurnAction } from './end-turn.action';
+import { MoveAction } from './move.action';
+import { StartBattleAction } from './start-battle.action';
 
 type GenericActionMap = Record<string, Constructor<GameAction<DefaultSchema>>>;
 
@@ -15,7 +20,13 @@ type ValidatedActionMap<T extends GenericActionMap> = {
 const validateActionMap = <T extends GenericActionMap>(data: ValidatedActionMap<T>) =>
   data;
 
-const actionMap = validateActionMap({});
+const actionMap = validateActionMap({
+  attack: AttackAction,
+  deploy: DeployAction,
+  endTurn: EndTurnAction,
+  move: MoveAction,
+  startBattle: StartBattleAction
+});
 
 export class ActionSystem implements Serializable {
   private history: GameAction<any>[] = [];
@@ -28,12 +39,12 @@ export class ActionSystem implements Serializable {
     }
   }
 
+  private isActionType(type: string): type is keyof typeof actionMap {
+    return Object.keys(actionMap).includes(type);
+  }
+
   async dispatch({ type, payload }: SerializedAction) {
-    if (!this.session.isAuthoritative) {
-      throw new Error(
-        'Non authoritative game session cannot receive player inputs. Use dispatchAction instead'
-      );
-    }
+    if (!this.isActionType(type)) return;
 
     const ctor = actionMap[type];
     const action = new ctor(payload, this.session);

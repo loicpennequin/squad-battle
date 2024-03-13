@@ -14,7 +14,7 @@ const HEIGHT = 10;
 const state: SerializedGameState = {
   activeEntityId: null,
   history: [],
-  phase: 'battle',
+  phase: 'deploy',
   map: {
     height: HEIGHT,
     width: WIDTH,
@@ -30,15 +30,7 @@ const state: SerializedGameState = {
       }))
     ).flat()
   },
-  entities: [
-    {
-      atbSeed: 0.001,
-      blueprintId: 'test',
-      playerId: '1',
-      id: 1,
-      position: { x: 0, y: 1, z: 0 }
-    }
-  ],
+  entities: [],
   players: [
     {
       id: '1',
@@ -47,7 +39,7 @@ const state: SerializedGameState = {
       deployment: [
         {
           characterId: 'test',
-          position: { x: 0, y: 0, z: 0 }
+          position: { x: 1, y: 1, z: 0 }
         }
       ]
     },
@@ -55,12 +47,20 @@ const state: SerializedGameState = {
       id: '2',
       name: 'Player 2',
       team: [],
-      deployment: []
+      deployment: [
+        {
+          characterId: 'test',
+          position: { x: 8, y: 8, z: 0 }
+        }
+      ]
     }
   ]
 };
 
 const session = GameSession.createClientSession(state, 'seed');
+session.onReady(() => {
+  session.transitionToBattle();
+});
 </script>
 
 <template>

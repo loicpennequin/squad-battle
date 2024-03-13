@@ -16,7 +16,7 @@ const schema = defaultActionSchema.extend({
 });
 
 export class DeployAction extends GameAction<typeof schema> {
-  readonly name = 'endTurn';
+  readonly name = 'deploy';
 
   protected payloadSchema = schema;
 

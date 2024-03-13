@@ -11,6 +11,11 @@ import { pointToCellId } from '../utils/helpers';
 import { Vec3 } from '../utils/vector';
 import { GameSession } from '../game-session';
 
+export type DistanceMap = {
+  costs: ReturnType<typeof dijkstra>['costs'];
+  get: (point: Point3D) => number;
+};
+
 export class Pathfinder {
   private cache = new Map<CellId, Edge<CellId>[]>();
 
@@ -36,7 +41,7 @@ export class Pathfinder {
             edges
               .filter(isDefined)
               .filter(point => {
-                if (!this.session.entityManager.getEntityAt(point)) return false;
+                if (!this.session.entitySystem.getEntityAt(point)) return false;
                 if (this.boundaries) {
                   return (
                     originVec.dist(point) <= originVec.dist(this.boundaries[0]) &&
@@ -67,7 +72,7 @@ export class Pathfinder {
     );
   }
 
-  getDistanceMap(from: Point3D) {
+  getDistanceMap(from: Point3D): DistanceMap {
     const map = dijkstra(this.makeAdapter(from), pointToCellId(from));
 
     return {

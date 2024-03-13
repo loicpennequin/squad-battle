@@ -4,7 +4,7 @@ import { Cell, type CellId, type SerializedCell } from './cell';
 import { cellIdToPoint } from '../utils/helpers';
 import type { GameSession } from '../game-session';
 import { DIRECTIONS_TO_DIFF, type Direction } from './map-utils';
-import { Pathfinder } from './pathfinding';
+import { Pathfinder, type DistanceMap } from './pathfinding';
 import type { Entity } from '../entity/entity';
 
 export type GameMapOptions = {
@@ -95,6 +95,7 @@ export class GameMap {
           Vec3.add(point, { x: maxDistance, y: maxDistance, z: maxDistance })
         ] as [Vec3, Vec3])
       : undefined;
+
     return new Pathfinder(this.session, boundaries).getDistanceMap(point);
   }
 

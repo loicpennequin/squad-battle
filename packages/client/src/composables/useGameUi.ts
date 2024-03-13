@@ -1,12 +1,12 @@
 import type { GameSession } from '@game/sdk';
 import type { InjectionKey } from 'vue';
-import { GameUi } from '~/models/game-ui';
+import { GameUi, type IGameUi } from '~/models/game-ui';
 
-export type GameUiContext = Ref<GameUi>;
+export type GameUiContext = Ref<IGameUi>;
 const GAME_UI_INJECTION_KEY = Symbol('iso-camera') as InjectionKey<GameUiContext>;
 
 export const useGameUiProvider = (session: GameSession) => {
-  const ui = ref(new GameUi(session)) as Ref<GameUi>;
+  const ui = ref(new GameUi(session)) as Ref<IGameUi>;
 
   provide(GAME_UI_INJECTION_KEY, ui);
 

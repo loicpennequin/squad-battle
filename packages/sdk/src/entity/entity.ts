@@ -161,7 +161,7 @@ export class Entity extends EventEmitter<EntityEventMap> implements Serializable
   }
 
   get maxAp(): number {
-    return this.interceptors.maxAp.getValue(this.blueprint.maxHp, this);
+    return this.interceptors.maxAp.getValue(this.blueprint.maxAp, this);
   }
 
   get attack(): number {

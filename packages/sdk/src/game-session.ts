@@ -139,11 +139,12 @@ export class GameSession extends EventEmitter<GlobalGameEvents> {
   }
 
   transitionToBattle() {
-    this.playerSystem.getList().forEach(player => {
-      player.deployTeam();
-    });
-    this.atbSystem.tickUntilActiveEntity(this.entitySystem.getList());
-    this.phase = GAME_PHASES.BATTLE;
+    this.actionSystem.dispatch({ type: 'startBattle', payload: { playerId: '' } });
+    // this.playerSystem.getList().forEach(player => {
+    //   player.deployTeam();
+    // });
+    // this.atbSystem.tickUntilActiveEntity(this.entitySystem.getList());
+    // this.phase = GAME_PHASES.BATTLE;
   }
 
   serialize(): SerializedGameState {

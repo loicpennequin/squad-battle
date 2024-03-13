@@ -2,7 +2,10 @@
 import type { GameSession, GameState } from '@game/sdk';
 import type { AssetsContext } from './useAssets';
 import type { IsoCameraContext } from './useIsoCamera';
-import type { GameUi } from '~/models/game-ui';
+import type { GameUi, IGameUi } from '~/models/game-ui';
+import { EntityViewModel } from '~/models/entity-view-model';
+import type { Override } from '@game/shared';
+import { MapCellViewModel } from '~/models/map-cell-view-model';
 
 // type ShortEmits<T extends Record<string, any>> = UnionToIntersection<
 //   Values<{
@@ -19,12 +22,21 @@ export type GameEmits = {
   // end: [{ winner: Player }];
 };
 
+export type State = Override<
+  GameState,
+  {
+    entities: EntityViewModel[];
+    activeEntity: EntityViewModel;
+    map: Override<GameState['map'], { cells: MapCellViewModel[] }>;
+  }
+>;
+
 export type GameContext = {
   camera: IsoCameraContext;
   assets: AssetsContext;
   session: GameSession;
-  state: Ref<GameState>;
-  ui: Ref<GameUi>;
+  state: Ref<State>;
+  ui: Ref<IGameUi>;
 };
 
 export const GAME_INJECTION_KEY = Symbol('game') as InjectionKey<GameContext>;
@@ -33,11 +45,25 @@ export const useGameProvider = (session: GameSession) => {
   const ui = useGameUiProvider(session);
   const camera = useIsoCameraProvider();
   const assets = useAssetsProvider();
-  const state = ref<GameState>(session.getState()) as Ref<GameState>;
+
+  const getState = (): State => {
+    const sessionState = session.getState();
+    return {
+      ...sessionState,
+      entities: sessionState.entities.map(e => new EntityViewModel(e, session, ui.value)),
+      activeEntity: new EntityViewModel(sessionState.activeEntity, session, ui.value),
+      map: {
+        ...sessionState.map,
+        cells: sessionState.map.cells.map(
+          cell => new MapCellViewModel(cell, session, ui.value, camera.value)
+        )
+      }
+    };
+  };
+  const state = ref(getState()) as Ref<State>;
 
   session.on('game:action', () => {
-    const newState = session.getState();
-    state.value = newState;
+    state.value = getState();
 
     // if (action.name === 'END_TURN') {
     //   context.ui.selectedEntity.value = null;
