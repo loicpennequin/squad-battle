@@ -17,5 +17,6 @@ const { state } = useGame();
     <Entity v-for="entity in state.entities" :key="entity.id" :entity="entity" />
   </Camera>
 
+  <Tint />
   <Fps />
 </template>

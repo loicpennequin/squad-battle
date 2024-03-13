@@ -71,18 +71,18 @@ export class GameMap {
     const cellAbove = this.getCellAt(targetAbove);
 
     if (!currentCell) return null;
+
     if (!currentCell.isWalkable) return null;
-
-    if (cellAbove) {
-      return cellAbove.isWalkable ? cellAbove : null;
+    if (cellAbove?.isWalkable) {
+      return targetAbove;
     }
 
-    if (cell) {
-      return cell.isWalkable ? cellAbove : null;
+    if (cell?.isWalkable) {
+      return target;
     }
 
-    if (cellBelow) {
-      return cellBelow.isWalkable ? cellAbove : null;
+    if (cellBelow?.isWalkable) {
+      return targetBelow;
     }
 
     return null;

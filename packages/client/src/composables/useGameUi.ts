@@ -52,6 +52,7 @@ export const useGameUiProvider = (session: GameSession) => {
     }),
     select(id) {
       selectedEntityId.value = id;
+      targetingMode.value = TARGETING_MODES.MOVE;
     },
     unselect() {
       selectedEntityId.value = null;

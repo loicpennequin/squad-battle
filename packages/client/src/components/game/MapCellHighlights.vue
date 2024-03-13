@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { Cell } from '@game/sdk';
+import { TextStyle } from 'pixi.js';
 import { match } from 'ts-pattern';
 import { PTransition } from 'vue3-pixi';
 
@@ -28,7 +29,7 @@ const bitmask = computed(() => {
       .with(TARGETING_MODES.SKILL, () => false /* todo */)
       .with(TARGETING_MODES.MOVE, () => {
         if (!ui.selectedEntity.value) return false;
-        return pathfinding.canMoveTo(ui.selectedEntity.value, cell);
+        return pathfinding.canMoveTo(ui.selectedEntity.value, neighbor);
       })
       .with(TARGETING_MODES.NONE, () => false /* todo */)
 
@@ -43,12 +44,23 @@ const texture = computed(() => {
 });
 
 const { autoDestroyRef } = useAutoDestroy();
+
+const bmStyle = new TextStyle({
+  fill: 'white',
+  fontSize: 18,
+  fontFamily: 'monospace',
+  dropShadow: true,
+  dropShadowColor: 'black',
+  dropShadowDistance: 2,
+  stroke: 'black',
+  strokeThickness: 4
+});
 </script>
 
 <template>
   <PTransition
     appear
-    :duration="{ enter: 500, leave: 300 }"
+    :duration="{ enter: 300, leave: 300 }"
     :before-enter="{ alpha: 0 }"
     :enter="{ alpha: 1 }"
     :leave="{ alpha: 0 }"
@@ -57,10 +69,8 @@ const { autoDestroyRef } = useAutoDestroy();
       v-if="texture && isHighlighted"
       :ref="container => autoDestroyRef(container)"
       event-mode="none"
-      :x="-CELL_WIDTH / 2"
-      :y="-CELL_HEIGHT / 2"
     >
-      <sprite :texture="texture" />
+      <sprite :texture="texture" :anchor="0.5" />
     </container>
   </PTransition>
 </template>

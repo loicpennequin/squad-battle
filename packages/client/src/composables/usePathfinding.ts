@@ -20,7 +20,8 @@ export const usePathfindingProvider = (session: GameSession) => {
   const api: PathfindingContext = {
     canMoveTo(entity, point) {
       if (!cache.has(entity.id)) {
-        cache.set(entity.id, session.map.getDistanceMap(entity.position, entity.ap));
+        const dm = session.map.getDistanceMap(entity.position, entity.ap);
+        cache.set(entity.id, dm);
       }
       const distanceMap = cache.get(entity.id)!;
 

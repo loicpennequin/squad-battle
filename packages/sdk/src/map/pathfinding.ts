@@ -10,6 +10,7 @@ import type { Point3D } from '../types';
 import { pointToCellId } from '../utils/helpers';
 import { Vec3 } from '../utils/vector';
 import { GameSession } from '../game-session';
+import { isEmpty } from '../entity/entity-utils';
 
 export type DistanceMap = {
   costs: ReturnType<typeof dijkstra>['costs'];
@@ -36,12 +37,13 @@ export class Pathfinder {
             this.session.map.getDestination(node, 'west'),
             this.session.map.getDestination(node, 'east')
           ];
+
           this.cache.set(
             node,
             edges
               .filter(isDefined)
               .filter(point => {
-                if (!this.session.entitySystem.getEntityAt(point)) return false;
+                if (!isEmpty(this.session, point)) return false;
                 if (this.boundaries) {
                   return (
                     originVec.dist(point) <= originVec.dist(this.boundaries[0]) &&
