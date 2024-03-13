@@ -2,10 +2,12 @@
 import type { Cell } from '@game/sdk';
 import shape from '@/assets/hitboxes/tile.json';
 import { Hitbox } from '~/models/hitbox';
+import { MapCellViewModel } from '~/models/map-cell-view-model';
 
 const { cell } = defineProps<{ cell: Cell }>();
 
 const { assets, camera, state, ui, session } = useGame();
+const vm = computed(() => new MapCellViewModel(cell, session, ui.value));
 
 const textures = computed(() => {
   const sheet = assets.getSpritesheet(cell.terrain);
@@ -34,9 +36,7 @@ const hitArea = Hitbox.from(shape.shapes[0].points, shape.shapes[0].source.width
 <template>
   <IsoPositioner
     animated
-    :x="cell.position.x"
-    :y="cell.position.y"
-    :z="cell.position.z"
+    v-bind="vm.cell.position"
     :angle="camera.angle"
     :height="state.map.height"
     :width="state.map.width"
@@ -49,6 +49,7 @@ const hitArea = Hitbox.from(shape.shapes[0].points, shape.shapes[0].source.width
         @pointerenter="ui.hoverAt(cell)"
         @pointerleave="ui.unhoverCell()"
       />
+      <HoveredCell v-if="vm.isHovered" />
     </container>
   </IsoPositioner>
 </template>

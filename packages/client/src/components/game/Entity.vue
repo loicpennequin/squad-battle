@@ -3,6 +3,7 @@ import { Entity } from '@game/sdk';
 import { type Filter } from 'pixi.js';
 import { EntityViewModel } from '~/models/entity-view-model';
 import { OutlineFilter } from '@pixi/filter-outline';
+import { AdvancedBloomFilter } from '@pixi/filter-advanced-bloom';
 import shape from '@/assets/hitboxes/test.json';
 import { Hitbox } from '~/models/hitbox';
 
@@ -17,11 +18,31 @@ const textures = computed(() => {
 
 const vm = computed(() => new EntityViewModel(entity, ui.value));
 
-const selectedFilter = new OutlineFilter(1.5, 0xffffff, 0.2, 1);
+const hoveredFilters = [
+  new AdvancedBloomFilter({
+    blur: 0,
+    bloomScale: 0.9,
+    threshold: 0.75
+  }),
+  new OutlineFilter(2, 0xffffff, 0.2, 0)
+];
+
+watchEffect(() => {
+  gsap.to(hoveredFilters[0], {
+    duration: 0.2,
+    blur: vm.value.isHovered ? 4 : 0,
+    ease: Power2.easeOut
+  });
+  gsap.to(hoveredFilters[1], {
+    duration: 0.2,
+    alpha: vm.value.isHovered ? 1 : 0,
+    ease: Power2.easeOut
+  });
+});
 const filters = computed(() => {
   const result: Filter[] = [];
   if (vm.value.isHovered) {
-    result.push(selectedFilter);
+    result.push(...hoveredFilters);
   }
   return result;
 });
