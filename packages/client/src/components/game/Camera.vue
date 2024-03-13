@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { useApplication } from 'vue3-pixi';
 import { type Viewport } from 'pixi-viewport';
-import { Cell } from '@game/sdk';
 import { CELL_HEIGHT, CELL_WIDTH } from '@/utils/constants';
 import { pointToIndex } from '@game/shared';
 
@@ -23,15 +22,15 @@ useEventListener('keydown', e => {
   if (e.repeat) return;
 
   if (e.code === 'KeyQ') {
-    camera.value.rotateCCW();
+    camera.rotateCCW();
   } else if (e.code === 'KeyE') {
-    camera.value.rotateCW();
+    camera.rotateCW();
   }
 });
 
 const isoCells = computed(() =>
   state.value.map.cells.map(cell =>
-    toIso(cell.position, camera.value.angle, state.value.map)
+    toIso(cell.position, camera.angle.value, state.value.map)
   )
 );
 const minX = computed(() => Math.min(...isoCells.value.map(c => c.isoX)));

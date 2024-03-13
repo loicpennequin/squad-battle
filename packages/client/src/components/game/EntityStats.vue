@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import type { EntityViewModel } from '~/models/entity-view-model';
+import type { Entity } from '@game/sdk';
 
-const { entity } = defineProps<{ entity: EntityViewModel }>();
+const { entity } = defineProps<{ entity: Entity }>();
 
 const { assets } = useGame();
 

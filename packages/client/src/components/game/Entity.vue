@@ -1,17 +1,17 @@
 <script setup lang="ts">
-import { type Filter } from 'pixi.js';
-import { EntityViewModel } from '~/models/entity-view-model';
 import { OutlineFilter } from '@pixi/filter-outline';
 import { AdvancedBloomFilter } from '@pixi/filter-advanced-bloom';
 import shape from '@/assets/hitboxes/test.json';
-import { Hitbox } from '~/models/hitbox';
+import type { Entity } from '@game/sdk';
+import type { Filter } from 'pixi.js';
+import { Hitbox } from '~/utils/hitbox';
 
-const { entity } = defineProps<{ entity: EntityViewModel }>();
+const { entity } = defineProps<{ entity: Entity }>();
 
 const { camera, assets, state, ui } = useGame();
 
 const textures = computed(() => {
-  const sheet = assets.getSpritesheet(entity.spriteId);
+  const sheet = assets.getSpritesheet(entity.blueprint.spriteId);
   return createSpritesheetFrameObject('idle', sheet);
 });
 const activeTexture = computed(() => {
@@ -28,22 +28,26 @@ const hoveredFilters = [
   new OutlineFilter(2, 0xffffff, 0.2, 0)
 ];
 
+const isHovered = computed(() => ui.hoveredEntity.value?.equals(entity));
+const isSelected = computed(() => ui.selectedEntity.value?.equals(entity));
+const isActive = computed(() => state.value.activeEntity.equals(entity));
+
 watchEffect(() => {
   gsap.to(hoveredFilters[0], {
     duration: 0.2,
-    blur: entity.isHovered || entity.isSelected ? 4 : 0,
+    blur: isHovered.value || isSelected.value ? 4 : 0,
     ease: Power2.easeOut
   });
   gsap.to(hoveredFilters[1], {
     duration: 0.2,
-    alpha: entity.isHovered || entity.isSelected ? 1 : 0,
+    alpha: isHovered.value || isSelected.value ? 1 : 0,
     ease: Power2.easeOut
   });
 });
 
 const filters = computed(() => {
   const result: Filter[] = [];
-  if (entity.isHovered || entity.isSelected) {
+  if (isHovered.value || isSelected.value) {
     result.push(...hoveredFilters);
   }
 
@@ -58,7 +62,7 @@ const hitArea = Hitbox.from(shape.shapes[0].points, shape.shapes[0].source, 0.5)
     animated
     v-bind="entity.position"
     :z-index-offset="2"
-    :angle="camera.angle"
+    :angle="camera.angle.value"
     :height="state.map.height"
     :width="state.map.width"
   >
@@ -66,7 +70,7 @@ const hitArea = Hitbox.from(shape.shapes[0].points, shape.shapes[0].source, 0.5)
       <EntityStats :entity="entity" />
 
       <animated-sprite
-        v-if="entity.isActive(state)"
+        v-if="isActive"
         :textures="activeTexture"
         event-mode="none"
         :anchor="0.5"
@@ -82,8 +86,9 @@ const hitArea = Hitbox.from(shape.shapes[0].points, shape.shapes[0].source, 0.5)
             ui.hoverAt(entity.position);
           }
         "
-        @pointerup="entity.isSelected ? entity.unselect() : entity.select()"
+        @pointerup="isSelected ? ui.unselect() : ui.select(entity.id)"
       />
     </container>
   </IsoPositioner>
 </template>
+~/utils/hitbox

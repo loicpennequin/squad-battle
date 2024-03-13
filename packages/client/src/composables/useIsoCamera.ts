@@ -1,15 +1,28 @@
-import { IsoCamera } from '@/models/iso-camera';
 import type { InjectionKey } from 'vue';
 
-export type IsoCameraContext = Ref<IsoCamera>;
+export type RotationAngle = 0 | 90 | 180 | 270;
+
+export type IsoCameraContext = {
+  angle: Ref<RotationAngle>;
+  rotateCW(): void;
+  rotateCCW(): void;
+};
 const ISOCAMERA_INJECTION_KEY = Symbol('iso-camera') as InjectionKey<IsoCameraContext>;
 
 export const useIsoCameraProvider = () => {
-  const camera = ref(new IsoCamera()) as Ref<IsoCamera>;
+  const api: IsoCameraContext = {
+    angle: ref(0),
+    rotateCW() {
+      api.angle.value = ((api.angle.value + 360 + 90) % 360) as RotationAngle;
+    },
+    rotateCCW() {
+      api.angle.value = ((api.angle.value + 360 - 90) % 360) as RotationAngle;
+    }
+  };
 
-  provide(ISOCAMERA_INJECTION_KEY, camera);
+  provide(ISOCAMERA_INJECTION_KEY, api);
 
-  return camera;
+  return api;
 };
 
 export const useIsoCamera = () => useSafeInject(ISOCAMERA_INJECTION_KEY);

@@ -1,6 +1,5 @@
 import type { Spritesheet, Texture } from 'pixi.js';
-import type { GameSession, Cell } from '@game/sdk';
-import type { State } from '~/composables/useGame';
+import type { GameSession, Cell, GameState } from '@game/sdk';
 
 // prettier-ignore
 const neighborCoords: [number, number][][] = [
@@ -17,7 +16,6 @@ const weights = [
 
 export const getBitMask = (
   session: GameSession,
-  state: State,
   cell: Cell,
   rotation: number,
   compareFn: (neighbor: Cell | undefined) => boolean

@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import shape from '@/assets/hitboxes/tile.json';
-import { Hitbox } from '~/models/hitbox';
-import { MapCellViewModel } from '~/models/map-cell-view-model';
+import type { Cell } from '@game/sdk';
+import { Hitbox } from '~/utils/hitbox';
 
-const { cell } = defineProps<{ cell: MapCellViewModel }>();
+const { cell } = defineProps<{ cell: Cell }>();
 
 const { assets, camera, state, ui } = useGame();
 
@@ -12,6 +12,7 @@ const textures = computed(() => {
   return sheet.animations[0];
 });
 
+const isHovered = computed(() => ui.hoveredCell.value?.equals(cell));
 // const hitArea = computed(() => {
 //   const STEP = CELL_SIZE / 4;
 //   const hitAreaYOffset = cell.isHalfTile ? STEP / 2 : 0;
@@ -35,7 +36,7 @@ const hitArea = Hitbox.from(shape.shapes[0].points, shape.shapes[0].source, 0.5)
   <IsoPositioner
     animated
     v-bind="cell.position"
-    :angle="camera.angle"
+    :angle="camera.angle.value"
     :height="state.map.height"
     :width="state.map.width"
   >
@@ -44,13 +45,14 @@ const hitArea = Hitbox.from(shape.shapes[0].points, shape.shapes[0].source, 0.5)
         :textures="textures"
         :anchor="0.5"
         :hit-area="hitArea"
-        @pointerdown="ui.unselectEntity"
+        @pointerdown="ui.unselect()"
         @pointerenter="ui.hoverAt(cell.position)"
         @pointerleave="ui.unhover()"
       />
 
-      <MapCelHighlights :cell="cell" />
-      <HoveredCell v-if="cell.isHovered" />
+      <MapCellHighlights :cell="cell" />
+      <HoveredCell v-if="isHovered" />
     </container>
   </IsoPositioner>
 </template>
+~/utils/hitbox
