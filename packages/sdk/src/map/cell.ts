@@ -22,6 +22,10 @@ export class Cell implements Serializable {
     this.availableForDeploy = options.availableForDeploy;
   }
 
+  equals(cell: Cell) {
+    return cell.id === this.id;
+  }
+
   clone() {
     const clone = new Cell(this.serialize());
 

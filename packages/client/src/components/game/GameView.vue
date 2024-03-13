@@ -14,6 +14,7 @@ const { state } = useGame();
   <Camera>
     <MapCell v-for="cell in state.map.cells" :key="cell.id" :cell="cell" />
 
+    <HoveredCell />
     <Entity v-for="entity in state.entities" :key="entity.id" :entity="entity" />
   </Camera>
 

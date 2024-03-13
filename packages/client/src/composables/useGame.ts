@@ -2,6 +2,7 @@
 import type { GameSession, GameState } from '@game/sdk';
 import type { AssetsContext } from './useAssets';
 import type { IsoCameraContext } from './useIsoCamera';
+import type { GameUi } from '~/models/game-ui';
 
 // type ShortEmits<T extends Record<string, any>> = UnionToIntersection<
 //   Values<{
@@ -23,14 +24,15 @@ export type GameContext = {
   assets: AssetsContext;
   session: GameSession;
   state: Ref<GameState>;
+  ui: Ref<GameUi>;
 };
 
 export const GAME_INJECTION_KEY = Symbol('game') as InjectionKey<GameContext>;
 
 export const useGameProvider = (session: GameSession) => {
+  const ui = useGameUiProvider(session);
   const camera = useIsoCameraProvider();
   const assets = useAssetsProvider();
-
   const state = ref<GameState>(session.getState()) as Ref<GameState>;
 
   session.on('game:action', () => {
@@ -50,7 +52,7 @@ export const useGameProvider = (session: GameSession) => {
     session.removeAllListeners();
   });
 
-  const ctx: GameContext = { camera, assets, session, state };
+  const ctx: GameContext = { camera, assets, session, state, ui };
   provide(GAME_INJECTION_KEY, ctx);
 
   return ctx;

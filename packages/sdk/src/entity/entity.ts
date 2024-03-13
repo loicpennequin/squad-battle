@@ -91,6 +91,10 @@ export class Entity extends EventEmitter<EntityEventMap> implements Serializable
     this.emit('created', this);
   }
 
+  equals(entity: Entity) {
+    return entity.id === this.id;
+  }
+
   clone() {
     return new Entity(this.session, this.serialize());
   }

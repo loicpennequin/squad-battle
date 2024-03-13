@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import type { Cell } from '@game/sdk';
+import shape from '@/assets/hitboxes/tile.json';
+import { Hitbox } from '~/models/hitbox';
 
 const { cell } = defineProps<{ cell: Cell }>();
 
-const { assets, camera, state } = useGame();
+const { assets, camera, state, ui, session } = useGame();
 
 const textures = computed(() => {
   const sheet = assets.getSpritesheet(cell.terrain);
@@ -25,6 +27,8 @@ const textures = computed(() => {
 
 //   return p;
 // });
+
+const hitArea = Hitbox.from(shape.shapes[0].points, shape.shapes[0].source.width / 2);
 </script>
 
 <template>
@@ -37,8 +41,14 @@ const textures = computed(() => {
     :height="state.map.height"
     :width="state.map.width"
   >
-    <container event-mode="none">
-      <animated-sprite :textures="textures" :anchor="0.5" />
+    <container>
+      <animated-sprite
+        :textures="textures"
+        :anchor="0.5"
+        :hit-area="hitArea"
+        @pointerenter="ui.hoverAt(cell)"
+        @pointerleave="ui.unhoverCell()"
+      />
     </container>
   </IsoPositioner>
 </template>

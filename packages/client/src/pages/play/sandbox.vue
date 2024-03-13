@@ -9,7 +9,7 @@ definePageMeta({
   }
 });
 
-const WIDTH = 15;
+const WIDTH = 10;
 const HEIGHT = 10;
 const state: SerializedGameState = {
   activeEntityId: null,
