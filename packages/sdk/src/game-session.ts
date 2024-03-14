@@ -15,6 +15,7 @@ import type { Nullable, Values } from '@game/shared';
 import type { Player, SerializedPlayer } from './player/player';
 import { ActionSystem } from './action/action-system';
 import randoomSeed from 'seedrandom';
+import { noopFXContext, type FXSystem } from './fx-system';
 
 export type GameState = {
   map: Pick<GameMap, 'height' | 'width' | 'cells'>;
@@ -57,11 +58,19 @@ export type GamePhase = Values<typeof GAME_PHASES>;
 
 export class GameSession extends EventEmitter<GlobalGameEvents> {
   static createServerSession(state: SerializedGameState, seed: string) {
-    return new GameSession(state, { seed, isAuthoritative: true });
+    return new GameSession(state, {
+      seed,
+      isAuthoritative: true,
+      fxSystem: noopFXContext
+    });
   }
 
-  static createClientSession(state: SerializedGameState, seed: string) {
-    return new GameSession(state, { seed, isAuthoritative: false });
+  static createClientSession(
+    state: SerializedGameState,
+    seed: string,
+    fxSystem: FXSystem
+  ) {
+    return new GameSession(state, { seed, isAuthoritative: false, fxSystem });
   }
 
   seed: string;
@@ -84,15 +93,19 @@ export class GameSession extends EventEmitter<GlobalGameEvents> {
 
   readonly isAuthoritative: boolean;
 
+  fxSystem: FXSystem;
+
   private constructor(
     private initialState: SerializedGameState,
     options: {
       isAuthoritative: boolean;
       seed: string;
+      fxSystem: FXSystem;
     }
   ) {
     super();
     this.isAuthoritative = options.isAuthoritative;
+    this.fxSystem = options.fxSystem;
     this.seed = options.seed;
     this.rng = randoomSeed(this.seed);
     this.setup();

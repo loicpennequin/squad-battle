@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import type { Point3D } from '@game/shared';
 import { rotate } from '../../utils/rotate-map';
-import type { RotationAngle } from '~/models/iso-camera';
 
 const {
   x,

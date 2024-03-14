@@ -6,7 +6,7 @@ import { Hitbox } from '~/utils/hitbox';
 
 const { cell } = defineProps<{ cell: Cell }>();
 
-const { assets, camera, state, ui, dispatch, pathfinding } = useGame();
+const { assets, camera, state, ui, dispatch, pathfinding, fx } = useGame();
 
 const textures = computed(() => {
   const sheet = assets.getSpritesheet(cell.terrain);
@@ -20,7 +20,7 @@ const hitArea = Hitbox.from(shape.shapes[0].points, shape.shapes[0].source, 0.5)
 
 <template>
   <IsoPositioner
-    animated
+    :animated="!fx.isPlaying.value"
     v-bind="cell.position"
     :angle="camera.angle.value"
     :height="state.map.height"

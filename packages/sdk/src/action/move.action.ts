@@ -30,6 +30,14 @@ export class MoveAction extends GameAction<typeof schema> {
       throw new Error(`Entity ${entity.id} cannot move to target cell.`);
     }
 
+    for (const point of path.path) {
+      await this.session.fxSystem.moveEntity(
+        this.session.atbSystem.activeEntity.id,
+        point,
+        0.3
+      );
+    }
+
     entity.move(path.path);
   }
 }

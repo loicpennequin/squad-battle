@@ -57,7 +57,8 @@ const state: SerializedGameState = {
   ]
 };
 
-const session = GameSession.createClientSession(state, 'seed');
+const fx = useFXProvider();
+const session = GameSession.createClientSession(state, 'seed', fx.ctx);
 session.onReady(() => {
   session.transitionToBattle();
 });

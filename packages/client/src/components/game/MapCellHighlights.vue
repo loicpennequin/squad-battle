@@ -4,7 +4,7 @@ import { match } from 'ts-pattern';
 import { PTransition } from 'vue3-pixi';
 
 const { cell } = defineProps<{ cell: Cell }>();
-const { session, assets, camera, ui, state, pathfinding } = useGame();
+const { session, assets, camera, ui, state, pathfinding, fx } = useGame();
 const movementTileset = computed(() => assets.getSpritesheet('bitmask-movement-ally'));
 const attackTileset = computed(() => assets.getSpritesheet('bitmask-danger'));
 
@@ -35,8 +35,8 @@ const matchAttack = (cell: Cell) => {
     .exhaustive();
 };
 
-const isMovementDisplayed = computed(() => matchMovement(cell));
-const isAttackDisplayed = computed(() => matchAttack(cell));
+const isMovementDisplayed = computed(() => !fx.isPlaying.value && matchMovement(cell));
+const isAttackDisplayed = computed(() => !fx.isPlaying.value && matchAttack(cell));
 
 const movementBitmask = computed(() => {
   return getBitMask(session, cell, camera.angle.value, neighbor => {

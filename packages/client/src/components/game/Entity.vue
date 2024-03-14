@@ -8,7 +8,7 @@ import { Hitbox } from '~/utils/hitbox';
 
 const { entity } = defineProps<{ entity: Entity }>();
 
-const { camera, assets, state, ui } = useGame();
+const { camera, assets, state, ui, fx } = useGame();
 
 const textures = computed(() => {
   const sheet = assets.getSpritesheet(entity.blueprint.spriteId);
@@ -68,9 +68,9 @@ const scaleX = computed(() => {
 
 <template>
   <IsoPositioner
-    animated
+    :animated="!fx.isPlaying.value"
     v-bind="entity.position"
-    :z-index-offset="2"
+    :z-index-offset="3"
     :angle="camera.angle.value"
     :height="state.map.height"
     :width="state.map.width"

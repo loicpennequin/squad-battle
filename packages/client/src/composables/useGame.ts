@@ -4,6 +4,7 @@ import type { AssetsContext } from './useAssets';
 import type { IsoCameraContext } from './useIsoCamera';
 import type { GameUiContext } from './useGameUi';
 import type { PathfindingContext } from './usePathfinding';
+import type { FxContext } from './useFx';
 
 type ShortEmits<T extends Record<string, any>> = UnionToIntersection<
   Values<{
@@ -28,6 +29,7 @@ export type GameContext = {
   ui: GameUiContext;
   pathfinding: PathfindingContext;
   dispatch: ShortEmits<GameEmits>;
+  fx: FxContext;
 };
 
 // sendInput: (type, payload?) => {
@@ -49,14 +51,16 @@ export const useGameProvider = (session: GameSession, emit: ShortEmits<GameEmits
   const camera = useIsoCameraProvider();
   const assets = useAssetsProvider();
   const pathfinding = usePathfindingProvider(session);
+  const fx = useFX();
 
   const state = ref(session.getState()) as Ref<GameState>;
+  fx.provideState(state);
 
   const dispatch: ShortEmits<GameEmits> = (type, payload) => {
     emit(type, payload);
   };
 
-  session.on('game:action', action => {
+  session.on('game:action', () => {
     state.value = session.getState();
     // if (action.name === 'END_TURN') {
     //   context.ui.selectedEntity.value = null;
@@ -71,7 +75,16 @@ export const useGameProvider = (session: GameSession, emit: ShortEmits<GameEmits
     session.removeAllListeners();
   });
 
-  const ctx: GameContext = { camera, assets, session, state, ui, pathfinding, dispatch };
+  const ctx: GameContext = {
+    camera,
+    assets,
+    session,
+    state,
+    ui,
+    pathfinding,
+    dispatch,
+    fx
+  };
   provide(GAME_INJECTION_KEY, ctx);
 
   return ctx;
