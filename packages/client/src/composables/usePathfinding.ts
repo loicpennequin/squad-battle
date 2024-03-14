@@ -4,6 +4,7 @@ import type { Point3D } from '@game/shared';
 
 export type PathfindingContext = {
   canMoveTo(entity: Entity, position: Point3D): boolean;
+  canAttackAt(entity: Entity, position: Point3D): boolean;
 };
 
 const PATHFINDING_INJECTION_KEY = Symbol(
@@ -11,19 +12,29 @@ const PATHFINDING_INJECTION_KEY = Symbol(
 ) as InjectionKey<PathfindingContext>;
 
 export const usePathfindingProvider = (session: GameSession) => {
-  const cache = new Map<EntityId, DistanceMap>();
+  const moveCache = new Map<EntityId, DistanceMap>();
+  const attackCache = new Map<EntityId, DistanceMap>();
 
   session.on('game:action', () => {
-    cache.clear();
+    moveCache.clear();
   });
 
   const api: PathfindingContext = {
     canMoveTo(entity, point) {
-      if (!cache.has(entity.id)) {
+      if (!moveCache.has(entity.id)) {
         const dm = session.map.getDistanceMap(entity.position, entity.ap);
-        cache.set(entity.id, dm);
+        moveCache.set(entity.id, dm);
       }
-      const distanceMap = cache.get(entity.id)!;
+      const distanceMap = moveCache.get(entity.id)!;
+
+      return entity.canMove(distanceMap.get(point));
+    },
+    canAttackAt(entity, point) {
+      if (!attackCache.has(entity.id)) {
+        const dm = session.map.getDistanceMap(entity.position, entity.maxAp + 1);
+        attackCache.set(entity.id, dm);
+      }
+      const distanceMap = attackCache.get(entity.id)!;
 
       return entity.canMove(distanceMap.get(point));
     }

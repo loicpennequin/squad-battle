@@ -1,60 +1,70 @@
 <script setup lang="ts">
 import type { Cell } from '@game/sdk';
-import { TextStyle } from 'pixi.js';
 import { match } from 'ts-pattern';
 import { PTransition } from 'vue3-pixi';
 
 const { cell } = defineProps<{ cell: Cell }>();
-const { session, assets, state, camera, ui, pathfinding } = useGame();
-const tileset = computed(() => assets.getSpritesheet('bitmask-movement-ally'));
+const { session, assets, camera, ui, state, pathfinding } = useGame();
+const movementTileset = computed(() => assets.getSpritesheet('bitmask-movement-ally'));
+const attackTileset = computed(() => assets.getSpritesheet('bitmask-danger'));
 
-const isHighlighted = computed(() => {
+const isMovementHighlightDisplayed = (cell: Cell) => {
   return match(ui.targetingMode.value)
-    .with(TARGETING_MODES.ATTACK, () => false /* todo */)
-    .with(TARGETING_MODES.SKILL, () => false /* todo */)
+    .with(TARGETING_MODES.ATTACK, TARGETING_MODES.SKILL, () => false)
     .with(TARGETING_MODES.MOVE, () => {
       if (!ui.selectedEntity.value) return false;
+      if (!ui.selectedEntity.value.isActive) return false;
       return pathfinding.canMoveTo(ui.selectedEntity.value, cell);
     })
-    .with(TARGETING_MODES.NONE, () => false)
+    .with(TARGETING_MODES.NONE, () => {
+      if (!ui.hoveredEntity.value) return false;
+      if (ui.hoveredEntity.value.isActive) return false;
+      return pathfinding.canMoveTo(ui.hoveredEntity.value, cell);
+    })
     .exhaustive();
-});
+};
 
-const bitmask = computed(() => {
+const isDangerHighlightDisplayed = (cell: Cell) => {
+  return match(ui.targetingMode.value)
+    .with(TARGETING_MODES.ATTACK, TARGETING_MODES.SKILL, () => false)
+    .with(TARGETING_MODES.MOVE, TARGETING_MODES.NONE, () => {
+      if (!ui.hoveredEntity.value) return false;
+      if (ui.hoveredEntity.value.isAlly(state.value.activeEntity.id)) return false;
+
+      return pathfinding.canAttackAt(ui.hoveredEntity.value, cell);
+    })
+    .exhaustive();
+};
+
+const movementBitmask = computed(() => {
   return getBitMask(session, cell, camera.angle.value, neighbor => {
     if (!neighbor) return false;
 
-    return match(ui.targetingMode.value)
-      .with(TARGETING_MODES.ATTACK, () => false /* todo */)
-      .with(TARGETING_MODES.SKILL, () => false /* todo */)
-      .with(TARGETING_MODES.MOVE, () => {
-        if (!ui.selectedEntity.value) return false;
-        return pathfinding.canMoveTo(ui.selectedEntity.value, neighbor);
-      })
-      .with(TARGETING_MODES.NONE, () => false /* todo */)
-
-      .exhaustive();
+    return isMovementHighlightDisplayed(neighbor);
   });
 });
 
-const texture = computed(() => {
-  if (!isDefined(bitmask.value)) return;
+const attackBitmask = computed(() => {
+  return getBitMask(session, cell, camera.angle.value, neighbor => {
+    if (!neighbor) return false;
 
-  return getTextureIndexFromBitMask(bitmask.value, tileset.value);
+    return isDangerHighlightDisplayed(neighbor);
+  });
+});
+
+const movementTexture = computed(() => {
+  if (!isDefined(movementBitmask.value)) return;
+
+  return getTextureIndexFromBitMask(movementBitmask.value, movementTileset.value);
+});
+
+const dangerTexture = computed(() => {
+  if (!isDefined(attackBitmask.value)) return;
+
+  return getTextureIndexFromBitMask(attackBitmask.value, attackTileset.value);
 });
 
 const { autoDestroyRef } = useAutoDestroy();
-
-const bmStyle = new TextStyle({
-  fill: 'white',
-  fontSize: 18,
-  fontFamily: 'monospace',
-  dropShadow: true,
-  dropShadowColor: 'black',
-  dropShadowDistance: 2,
-  stroke: 'black',
-  strokeThickness: 4
-});
 </script>
 
 <template>
@@ -66,11 +76,18 @@ const bmStyle = new TextStyle({
     :leave="{ alpha: 0 }"
   >
     <container
-      v-if="texture && isHighlighted"
+      v-if="movementTexture && isMovementHighlightDisplayed(cell)"
       :ref="container => autoDestroyRef(container)"
       event-mode="none"
     >
-      <sprite :texture="texture" :anchor="0.5" />
+      <sprite :texture="movementTexture" :anchor="0.5" />
+    </container>
+    <container
+      v-if="dangerTexture && isDangerHighlightDisplayed(cell)"
+      :ref="container => autoDestroyRef(container)"
+      event-mode="none"
+    >
+      <sprite :texture="dangerTexture" :anchor="0.5" />
     </container>
   </PTransition>
 </template>

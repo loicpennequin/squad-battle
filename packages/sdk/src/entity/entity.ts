@@ -5,6 +5,7 @@ import EventEmitter from 'eventemitter3';
 import type { PlayerId } from '../player/player';
 import { CHARACTER_BLUEPRINTS } from './character-blueprint';
 import { Interceptable, ReactiveValue, type inferInterceptor } from '../utils/helpers';
+import { isAlly, isEnemy } from './entity-utils';
 
 export type EntityId = number;
 
@@ -266,5 +267,21 @@ export class Entity extends EventEmitter<EntityEventMap> implements Serializable
   performAttack(target: Entity) {
     this.dealDamage(this.attack, target);
     this.ap--;
+  }
+
+  isAlly(entityId: EntityId) {
+    return isAlly(this.session, entityId, this.playerId);
+  }
+
+  isEnemy(entityId: EntityId) {
+    return isEnemy(this.session, entityId, this.playerId);
+  }
+
+  get isActive() {
+    const activeEntity = this.session.atbSystem.activeEntity;
+
+    if (!activeEntity) return false;
+
+    return this.equals(activeEntity);
   }
 }
