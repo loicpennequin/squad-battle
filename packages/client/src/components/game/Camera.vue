@@ -79,7 +79,7 @@ until(screenViewport)
   .then(() => {
     screenViewport.value
       ?.drag({
-        mouseButtons: 'left'
+        mouseButtons: 'right'
       })
       .pinch()
       .decelerate({ friction: 0.88 })

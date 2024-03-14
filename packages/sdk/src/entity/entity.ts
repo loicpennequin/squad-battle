@@ -6,6 +6,7 @@ import type { PlayerId } from '../player/player';
 import { CHARACTER_BLUEPRINTS } from './character-blueprint';
 import { Interceptable, ReactiveValue, type inferInterceptor } from '../utils/helpers';
 import { isAlly, isEnemy } from './entity-utils';
+import { isWithinCells } from '../utils/targeting';
 
 export type EntityId = number;
 
@@ -181,17 +182,25 @@ export class Entity extends EventEmitter<EntityEventMap> implements Serializable
     return this.interceptors.initiative.getValue(this.blueprint.initiative, this);
   }
 
-  canMove(distance: number) {
-    return this.interceptors.canMove.getValue(distance <= this.ap, this);
+  canMove(distance: number, simulatedAp?: number) {
+    return this.interceptors.canMove.getValue(distance <= (simulatedAp ?? this.ap), this);
   }
 
   canBeAttacked(source: Entity) {
     return this.interceptors.canBeAttackTarget.getValue(true, { entity: this, source });
   }
 
+  canAttackAt(point: Point3D, simulatedPosition?: Point3D) {
+    return isWithinCells(simulatedPosition ?? this.position, point, 1);
+  }
+
   canAttack(target: Entity) {
+    if (!this.canAttackAt(target.position)) return false;
+
+    const baseValue = this.ap > 0;
+
     return (
-      this.interceptors.canAttack.getValue(this.ap > 0, { entity: this, target }) &&
+      this.interceptors.canAttack.getValue(baseValue, { entity: this, target }) &&
       target.canBeAttacked(this)
     );
   }

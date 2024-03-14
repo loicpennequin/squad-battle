@@ -8,18 +8,18 @@ const { session, assets, camera, ui, state, pathfinding, fx } = useGame();
 const movementTileset = computed(() => assets.getSpritesheet('bitmask-movement-ally'));
 const attackTileset = computed(() => assets.getSpritesheet('bitmask-danger'));
 
-const matchMovement = (cell: Cell) => {
+const matchMovement = (cellToTest: Cell) => {
   return match(ui.targetingMode.value)
     .with(TARGETING_MODES.ATTACK, TARGETING_MODES.SKILL, () => false)
     .with(TARGETING_MODES.MOVE, () => {
       if (!ui.selectedEntity.value) return false;
       if (!ui.selectedEntity.value.isActive) return false;
-      return pathfinding.canMoveTo(ui.selectedEntity.value, cell);
+      return pathfinding.canMoveTo(ui.selectedEntity.value, cellToTest);
     })
     .with(TARGETING_MODES.NONE, () => {
       if (!ui.hoveredEntity.value) return false;
       if (!ui.hoveredEntity.value.isActive) return false;
-      return pathfinding.canMoveTo(ui.hoveredEntity.value, cell);
+      return pathfinding.canMoveTo(ui.hoveredEntity.value, cellToTest);
     })
     .exhaustive();
 };

@@ -1,4 +1,4 @@
-import { Vec3, isString } from '@game/shared';
+import { Vec3, isDefined, isString } from '@game/shared';
 import type { Point3D } from '../types';
 import { Cell, type CellId, type SerializedCell } from './cell';
 import { cellIdToPoint } from '../utils/helpers';
@@ -118,5 +118,18 @@ export class GameMap {
       distance: path.distance,
       path: path.path.map(p => Vec3.fromPoint3D(cellIdToPoint(p)))
     };
+  }
+
+  getNeighbors(point: Point3D) {
+    return [
+      this.getCellAt({ x: point.x - 1, y: point.y - 1, z: point.z }),
+      this.getCellAt({ x: point.x - 1, y: point.y, z: point.z }),
+      this.getCellAt({ x: point.x - 1, y: point.y + 1, z: point.z }),
+      this.getCellAt({ x: point.x, y: point.y - 1, z: point.z }),
+      this.getCellAt({ x: point.x, y: point.y + 1, z: point.z }),
+      this.getCellAt({ x: point.x + 1, y: point.y - 1, z: point.z }),
+      this.getCellAt({ x: point.x + 1, y: point.y, z: point.z }),
+      this.getCellAt({ x: point.x + 1, y: point.y + 1, z: point.z })
+    ].filter(isDefined);
   }
 }

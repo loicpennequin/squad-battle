@@ -1,4 +1,4 @@
-import type { Point3D, Values } from '@game/shared';
+import { type Point3D, type Values } from '@game/shared';
 
 export const DIRECTION = {
   NORTH: 'north',

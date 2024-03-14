@@ -86,6 +86,6 @@ onMounted(async () => {
 
 <template>
   <div class="pixi-app-container">
-    <canvas ref="canvas" />
+    <canvas ref="canvas" @contextmenu.prevent />
   </div>
 </template>

@@ -5,7 +5,7 @@ import { Graphics } from 'pixi.js';
 
 const { entity } = defineProps<{ entity: Entity }>();
 
-const { assets, session } = useGame();
+const { assets } = useGame();
 
 const sheet = assets.getSpritesheet('entity-stat-bars');
 
@@ -16,6 +16,8 @@ const textures = computed(() => {
 });
 
 const tweenedAtb = ref(entity.atb);
+const tweenedHp = ref(entity.atb);
+
 watch(
   () => entity.atb,
   (newAtb, oldAtb) => {
@@ -28,6 +30,15 @@ watch(
     });
   }
 );
+watch(
+  () => entity.hp,
+  newHp => {
+    gsap.to(tweenedHp, {
+      value: newHp,
+      duration: 0.5
+    });
+  }
+);
 </script>
 
 <template>
@@ -36,16 +47,21 @@ watch(
       ref="mask"
       @render="
         g => {
-          const slice = sheet.data.meta.slices?.find(slice => slice.name === 'atb');
-          if (!slice) return;
+          const slices = [
+            sheet.data.meta.slices?.find(atbSlice => atbSlice.name === 'atb'),
+            sheet.data.meta.slices?.find(atbSlice => atbSlice.name === 'hp')
+          ];
           g.clear();
           g.beginFill('black');
           g.drawRect(0, 0, sheet.data.meta.size!.w, sheet.data.meta.size!.h);
           g.endFill();
           g.beginHole();
-          const { bounds } = slice.keys[0];
-          const xOffset = clamp(Math.round(bounds.w * (tweenedAtb / 100)), 0, bounds.w);
-          g.drawRect(bounds.x + xOffset, bounds.y, bounds.w - xOffset, bounds.h);
+          slices.forEach(slice => {
+            if (!slice) return;
+            const { bounds } = slice.keys[0];
+            const xOffset = clamp(Math.round(bounds.w * (tweenedAtb / 100)), 0, bounds.w);
+            g.drawRect(bounds.x + xOffset, bounds.y, bounds.w - xOffset, bounds.h);
+          });
           g.endHole();
         }
       "
