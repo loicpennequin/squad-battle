@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { BLEND_MODES, Texture } from 'pixi.js';
 import { useScreen } from 'vue3-pixi';
+import { debounce } from 'lodash-es';
 
 const screen = useScreen();
 
@@ -18,7 +19,11 @@ function gradient() {
   return Texture.from(c);
 }
 
-const texture = gradient();
+const texture = ref(gradient());
+const debouncedResize = debounce(() => {
+  texture.value = gradient();
+}, 100);
+useEventListener(window, 'resize', debouncedResize);
 </script>
 
 <template>

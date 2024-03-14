@@ -56,6 +56,7 @@ export const useGameUiProvider = (session: GameSession) => {
     },
     unselect() {
       selectedEntityId.value = null;
+      targetingMode.value = TARGETING_MODES.NONE;
     },
     switchTargetingMode(mode) {
       match(mode)

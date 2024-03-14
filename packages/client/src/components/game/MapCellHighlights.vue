@@ -30,7 +30,6 @@ const isDangerHighlightDisplayed = (cell: Cell) => {
     .with(TARGETING_MODES.MOVE, TARGETING_MODES.NONE, () => {
       if (!ui.hoveredEntity.value) return false;
       if (ui.hoveredEntity.value.isAlly(state.value.activeEntity.id)) return false;
-
       return pathfinding.canAttackAt(ui.hoveredEntity.value, cell);
     })
     .exhaustive();
