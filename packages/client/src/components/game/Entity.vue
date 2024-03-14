@@ -91,6 +91,7 @@ const scaleX = computed(() => {
         :filters="filters"
         :hit-area="hitArea"
         :anchor="0.5"
+        :scale-x="scaleX"
         @pointerenter="
           () => {
             ui.hoverAt(entity.position);

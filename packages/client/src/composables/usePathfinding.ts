@@ -17,6 +17,7 @@ export const usePathfindingProvider = (session: GameSession) => {
 
   session.on('game:action', () => {
     moveCache.clear();
+    attackCache.clear();
   });
 
   const api: PathfindingContext = {

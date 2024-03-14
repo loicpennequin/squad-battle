@@ -27,11 +27,11 @@ export const useFXProvider = () => {
   };
 
   const ctx: FXSystem = {
-    moveEntity(entityId, point, duration) {
+    moveEntity(entityId, path) {
       const state = ensureState();
       if (isHidden.value) return Promise.resolve();
 
-      return new Promise<void>(resolve => {
+      return new Promise(resolve => {
         isPlaying.value = true;
         // we are grabbing the entity from the reactive state instead of entityManager otherwise the movement won't be rendered !
         // It's ok because the position wil be updated when the action execution is flushed after the fx sequence
@@ -41,20 +41,26 @@ export const useFXProvider = () => {
           return resolve();
         }
 
-        gsap.to(entity.position, {
-          x: point.x,
-          y: point.y,
-          z: point.z,
-          duration,
-          ease: Power0.easeNone,
+        const timeline = gsap.timeline({
           onComplete() {
-            // we are waiting for nextTick because we dont want the entity position to be tweened again when the state update when the action happens
+            // we are waiting for nextTick because we dont want the entity position to be tweened again when the state update from the action happens
             nextTick(() => {
               isPlaying.value = false;
             });
             resolve();
           }
         });
+        for (const { point, duration } of path) {
+          timeline.to(entity.position, {
+            x: point.x,
+            y: point.y,
+            z: point.z,
+            duration,
+            ease: Power0.easeNone
+          });
+        }
+
+        timeline.play();
       });
     }
   };
