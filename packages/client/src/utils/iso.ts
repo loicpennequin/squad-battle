@@ -1,5 +1,6 @@
 import { deg2Rad } from '@game/shared';
 import type { Point, Point3D } from '@game/shared';
+import { CELL_HEIGHT, CELL_WIDTH } from './constants';
 
 export type IsoPoint = {
   isoX: number;
@@ -48,7 +49,7 @@ export function applyTransforms(
   const final = {
     x: iso.x * TILE_WIDTH,
     y: iso.y * TILE_HEIGHT,
-    z: z * TILE_HEIGHT
+    z: (z * CELL_HEIGHT) / 4
   };
 
   return final;

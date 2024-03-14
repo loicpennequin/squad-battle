@@ -11,13 +11,13 @@ const { state, ui } = useGame();
 <template>
   <Sky />
   <Camera>
-    <Layer :ref="ui.layers.scene">
+    <Layer :ref="(layer: any) => ui.registerLayer(layer, 'scene')">
       <MapCell v-for="cell in state.map.cells" :key="cell.id" :cell="cell" />
       <Entity v-for="entity in state.entities" :key="entity.id" :entity="entity" />
     </Layer>
   </Camera>
 
   <Tint />
-  <Layer :ref="ui.layers.ui" />
+  <Layer :ref="(layer: any) => ui.registerLayer(layer, 'ui')" />
   <Fps />
 </template>

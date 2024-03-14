@@ -28,7 +28,21 @@ const state: SerializedGameState = {
         terrain: x === 0 && y === 0 ? 'water' : 'ground',
         availableForDeploy: null
       }))
-    ).flat()
+    )
+      .concat(
+        Array.from({ length: HEIGHT / 2 }, (_, y) =>
+          Array.from({ length: WIDTH / 2 }, (_, x) => ({
+            position: {
+              x,
+              y,
+              z: 1
+            },
+            terrain: x === 0 && y === 0 ? 'water' : 'ground',
+            availableForDeploy: null
+          }))
+        )
+      )
+      .flat()
   },
   entities: [],
   players: [
@@ -39,7 +53,7 @@ const state: SerializedGameState = {
       deployment: [
         {
           characterId: 'test',
-          position: { x: 1, y: 1, z: 0 }
+          position: { x: 1, y: 1, z: 1 }
         }
       ]
     },

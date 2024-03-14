@@ -2,7 +2,6 @@
 import { clamp } from '@game/shared';
 import { config, type Entity } from '@game/sdk';
 import { Graphics } from 'pixi.js';
-import { Container } from 'postcss';
 
 const { entity } = defineProps<{ entity: Entity }>();
 

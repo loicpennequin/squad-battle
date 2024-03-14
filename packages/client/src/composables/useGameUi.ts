@@ -25,7 +25,7 @@ export type GameUiContext = {
   select(id: EntityId): void;
   unselect(): void;
   switchTargetingMode(mode: TargetingMode): void;
-  layers: Record<LayerName, Ref<Layer | undefined>>;
+  registerLayer(layer: Layer, name: LayerName): void;
   assignLayer(obj: Nullable<DisplayObject>, layer: LayerName): void;
 };
 
@@ -45,10 +45,15 @@ export const useGameUiProvider = (session: GameSession) => {
   });
 
   const api: GameUiContext = {
-    layers,
-    assignLayer(obj, layer) {
+    registerLayer(layer, name) {
+      if (!layer) return;
+      layers[name].value = layer;
+      layer.group.enableSort = true;
+      layer.sortableChildren = true;
+    },
+    assignLayer(obj, name) {
       if (!isDefined(obj)) return;
-      obj.parentLayer = layers[layer].value;
+      obj.parentLayer = layers[name].value;
     },
     hoveredEntity: computed(() => {
       if (!hoveredPosition.value) return null;

@@ -56,6 +56,7 @@ const filters = computed(() => {
     :angle="camera.angle.value"
     :height="state.map.height"
     :width="state.map.width"
+    debug
   >
     <container>
       <animated-sprite

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { Point3D } from '@game/shared';
 import { rotate } from '../../utils/rotate-map';
+import type { Container } from 'pixi.js';
 
 const {
   x,
@@ -93,6 +94,8 @@ watch([containerX, containerY], ([newX, newY]) => {
     ease: animated ? Power3.easeOut : Power0.easeOut
   });
 });
+
+const root = ref<Container>();
 </script>
 
 <template>
@@ -101,6 +104,7 @@ watch([containerX, containerY], ([newX, newY]) => {
     :ref="
       _container => {
         if (!_container) return;
+        root = _container as any;
         autoDestroyRef(_container);
       }
     "
