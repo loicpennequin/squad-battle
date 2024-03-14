@@ -39,6 +39,7 @@ export class ATBSystem {
       entities.forEach(e => {
         e.atb += e.initiative;
       });
+
       activeEntity = this.getHighestActiveEntity(entities);
     }
     if (!dryRun) {

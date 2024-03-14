@@ -49,7 +49,7 @@ const state: SerializedGameState = {
       team: [],
       deployment: [
         {
-          characterId: 'test',
+          characterId: 'test2',
           position: { x: 8, y: 8, z: 0 }
         }
       ]

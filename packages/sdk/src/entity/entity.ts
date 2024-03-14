@@ -15,6 +15,7 @@ export type SerializedEntity = {
   blueprintId: string;
   playerId: PlayerId;
   atbSeed: number;
+  atb?: number;
 };
 
 export const ENTITY_EVENTS = {
@@ -77,7 +78,7 @@ export class Entity extends EventEmitter<EntityEventMap> implements Serializable
 
   atbSeed = 0;
 
-  atb = this.atbSeed;
+  atb: number;
 
   constructor(
     protected session: GameSession,
@@ -88,7 +89,7 @@ export class Entity extends EventEmitter<EntityEventMap> implements Serializable
     this.position = Vec3.fromPoint3D(options.position);
     this.blueprintId = options.blueprintId;
     this.playerId = options.playerId;
-
+    this.atb = options.atb ?? this.atbSeed;
     this.emit('created', this);
   }
 
@@ -97,7 +98,10 @@ export class Entity extends EventEmitter<EntityEventMap> implements Serializable
   }
 
   clone() {
-    return new Entity(this.session, this.serialize());
+    const clone = new Entity(this.session, this.serialize());
+    clone.interceptors = this.interceptors;
+
+    return clone;
   }
 
   serialize(): SerializedEntity {
@@ -106,7 +110,8 @@ export class Entity extends EventEmitter<EntityEventMap> implements Serializable
       position: this.position.serialize(),
       blueprintId: this.blueprint.id,
       playerId: this.playerId,
-      atbSeed: this.atbSeed
+      atbSeed: this.atbSeed,
+      atb: this.atb
     };
   }
 
@@ -173,7 +178,7 @@ export class Entity extends EventEmitter<EntityEventMap> implements Serializable
   }
 
   get initiative(): number {
-    return this.interceptors.initiative.getValue(this.blueprint.attack, this);
+    return this.interceptors.initiative.getValue(this.blueprint.initiative, this);
   }
 
   canMove(distance: number) {

@@ -1,18 +1,57 @@
 <script setup lang="ts">
+import { clamp } from '@game/shared';
 import type { Entity } from '@game/sdk';
+import { Graphics } from 'pixi.js';
 
 const { entity } = defineProps<{ entity: Entity }>();
 
-const { assets } = useGame();
+const { assets, session } = useGame();
+
+const sheet = assets.getSpritesheet('entity-stat-bars');
+
+const mask = ref<Graphics>();
 
 const textures = computed(() => {
-  const sheet = assets.getSpritesheet('entity-stat-bars');
   return createSpritesheetFrameObject('idle', sheet);
 });
+
+const tweenedAtb = ref(entity.atb);
+watch(
+  () => entity.atb,
+  (newAtb, oldAtb) => {
+    if (oldAtb > newAtb) {
+      tweenedAtb.value = 0;
+    }
+    gsap.to(tweenedAtb, {
+      value: newAtb,
+      duration: 0.5
+    });
+  }
+);
 </script>
 
 <template>
-  <container event-mode="none">
-    <animated-sprite :textures="textures" :anchor="0.5" :y="-CELL_HEIGHT * 0.85" />
+  <container :y="-CELL_HEIGHT * 1.15" :x="-CELL_WIDTH * 0.3">
+    <pixi-graphics
+      ref="mask"
+      @render="
+        g => {
+          const slice = sheet.data.meta.slices?.find(slice => slice.name === 'atb');
+          if (!slice) return;
+          g.clear();
+          g.beginFill('black');
+          g.drawRect(0, 0, sheet.data.meta.size!.w, sheet.data.meta.size!.h);
+          g.endFill();
+          g.beginHole();
+          const { bounds } = slice.keys[0];
+          const xOffset = clamp(Math.round(bounds.w * (tweenedAtb / 100)), 0, bounds.w);
+          g.drawRect(bounds.x + xOffset, bounds.y, bounds.w - xOffset, bounds.h);
+          g.endHole();
+        }
+      "
+    />
+    <container :mask="mask">
+      <animated-sprite :textures="textures" />
+    </container>
   </container>
 </template>

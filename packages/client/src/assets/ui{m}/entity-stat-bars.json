@@ -23,6 +23,8 @@
    { "name": "Layer 1", "opacity": 255, "blendMode": "normal" }
   ],
   "slices": [
+   { "name": "hp", "color": "#0000ffff", "keys": [{ "frame": 0, "bounds": {"x": 17, "y": 6, "w": 40, "h": 2 } }] },
+   { "name": "atb", "color": "#0000ffff", "keys": [{ "frame": 0, "bounds": {"x": 17, "y": 14, "w": 40, "h": 2 } }] }
   ]
  }
 }
