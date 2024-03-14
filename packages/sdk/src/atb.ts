@@ -1,8 +1,7 @@
 import type { Nullable } from '@game/shared';
 import { Entity, type EntityId } from './entity/entity';
 import type { GameSession } from './game-session';
-
-export const MAX_ATB = 100;
+import { config } from './config';
 
 export class ATBSystem {
   private _activeEntity!: Entity;
@@ -25,7 +24,7 @@ export class ATBSystem {
 
   getHighestActiveEntity(entities: Entity[]) {
     return entities
-      .filter(e => e.atb >= MAX_ATB)
+      .filter(e => e.atb >= config.MAX_ATB)
       .sort((a, b) => b.atb - a.atb)
       .at(0);
   }
