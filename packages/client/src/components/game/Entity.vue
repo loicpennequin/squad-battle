@@ -55,6 +55,15 @@ const filters = computed(() => {
 });
 
 const hitArea = Hitbox.from(shape.shapes[0].points, shape.shapes[0].source, 0.5);
+
+const scaleX = computed(() => {
+  let value = entity.player.id === state.value.players[0].id ? 1 : -1;
+  if (camera.angle.value === 90 || camera.angle.value === 180) {
+    value *= -1;
+  }
+
+  return value;
+});
 </script>
 
 <template>
@@ -74,6 +83,7 @@ const hitArea = Hitbox.from(shape.shapes[0].points, shape.shapes[0].source, 0.5)
         :textures="activeTexture"
         event-mode="none"
         :anchor="0.5"
+        :scale-x="scaleX"
         playing
       />
       <animated-sprite

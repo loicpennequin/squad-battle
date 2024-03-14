@@ -137,7 +137,10 @@ export class Entity extends EventEmitter<EntityEventMap> implements Serializable
 
   private currentAp = new ReactiveValue(0, ap => {
     if (ap <= 0) {
-      // end turn
+      this.session.actionSystem.dispatch({
+        type: 'endTurn',
+        payload: { playerId: this.playerId }
+      });
     }
   });
 

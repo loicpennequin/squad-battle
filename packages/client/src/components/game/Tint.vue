@@ -19,7 +19,7 @@ function gradient() {
   return Texture.from(c);
 }
 
-const texture = ref(gradient());
+const texture = ref(gradient()) as Ref<Texture>;
 const debouncedResize = debounce(() => {
   texture.value = gradient();
 }, 100);

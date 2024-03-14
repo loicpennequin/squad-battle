@@ -13,15 +13,16 @@ import cursorDisabledUrl from '../../assets/cursors/cursor_disabled.png';
 import cursorAttackUrl from '../../assets/cursors/cursor_attack.png';
 import cursorMoveUrl from '../../assets/cursors/cursor_move.png';
 import cursorSummonUrl from '../../assets/cursors/cursor_summon.png';
+import type { GameEmits } from '#imports';
 
 const { gameSession } = defineProps<{
   gameSession: GameSession;
   // playerId: string | null;
   // isReplay?: boolean;
 }>();
-// const emit = defineEmits<GameEmits>();
+const emit = defineEmits<GameEmits>();
 
-const game = useGameProvider(gameSession);
+const game = useGameProvider(gameSession, emit);
 // const { ui, assets } = game;
 
 // @ts-ignore  enable PIXI devtools

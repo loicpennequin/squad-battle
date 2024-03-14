@@ -1,6 +1,5 @@
 import { z } from 'zod';
 import { GameAction, defaultActionSchema } from './action';
-import { getEntityIfOwnerMatches } from '../entity/entity-utils';
 import { GAME_PHASES } from '../game-session';
 
 const schema = defaultActionSchema.extend({
@@ -22,7 +21,6 @@ export class MoveAction extends GameAction<typeof schema> {
     if (!this.player.ownsActiveEntity()) {
       throw new Error(`Player ${this.player.name} doesn't own active entity.`);
     }
-
     const entity = this.session.atbSystem.activeEntity;
     const path = this.session.map.getPathTo(entity, this.payload);
 

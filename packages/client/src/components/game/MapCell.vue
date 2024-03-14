@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import shape from '@/assets/hitboxes/tile.json';
 import type { Cell } from '@game/sdk';
+import { match } from 'ts-pattern';
 import { Hitbox } from '~/utils/hitbox';
 
 const { cell } = defineProps<{ cell: Cell }>();
 
-const { assets, camera, state, ui } = useGame();
+const { assets, camera, state, ui, dispatch, pathfinding } = useGame();
 
 const textures = computed(() => {
   const sheet = assets.getSpritesheet(cell.terrain);
@@ -13,21 +14,6 @@ const textures = computed(() => {
 });
 
 const isHovered = computed(() => ui.hoveredCell.value?.equals(cell));
-// const hitArea = computed(() => {
-//   const STEP = CELL_SIZE / 4;
-//   const hitAreaYOffset = cell.isHalfTile ? STEP / 2 : 0;
-//   //prettier-ignore
-//   const p = new Polygon([
-//     { x: STEP * -2, y: STEP + hitAreaYOffset },
-//     { x: 0        , y: 0 + hitAreaYOffset },
-//     { x: STEP * 2 , y: STEP  + hitAreaYOffset },
-//     { x: STEP * 2 , y: STEP * 3 },
-//     { x: 0        , y: STEP * 4 },
-//     { x: STEP * -2, y: STEP * 3 }
-//   ]);
-
-//   return p;
-// });
 
 const hitArea = Hitbox.from(shape.shapes[0].points, shape.shapes[0].source, 0.5);
 </script>
@@ -45,9 +31,25 @@ const hitArea = Hitbox.from(shape.shapes[0].points, shape.shapes[0].source, 0.5)
         :textures="textures"
         :anchor="0.5"
         :hit-area="hitArea"
-        @pointerdown="ui.unselect()"
         @pointerenter="ui.hoverAt(cell.position)"
         @pointerleave="ui.unhover()"
+        @pointerup="
+          () => {
+            match(ui.targetingMode.value)
+              .with(TARGETING_MODES.MOVE, () => {
+                if (pathfinding.canMoveTo(state.activeEntity, cell)) {
+                  dispatch('move', cell.position);
+                } else {
+                  ui.unselect();
+                }
+              })
+              .otherwise(() => {
+                ui.unselect();
+              });
+            if (ui.targetingMode.value === TARGETING_MODES.MOVE) {
+            }
+          }
+        "
       />
 
       <MapCellHighlights :cell="cell" />
@@ -55,4 +57,3 @@ const hitArea = Hitbox.from(shape.shapes[0].points, shape.shapes[0].source, 0.5)
     </container>
   </IsoPositioner>
 </template>
-~/utils/hitbox

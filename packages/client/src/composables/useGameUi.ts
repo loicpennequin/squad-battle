@@ -31,6 +31,10 @@ export const useGameUiProvider = (session: GameSession) => {
   const selectedEntityId = ref<Nullable<EntityId>>(null);
   const targetingMode = ref<TargetingMode>(TARGETING_MODES.NONE);
 
+  session.on('game:action', () => {
+    targetingMode.value = TARGETING_MODES.NONE;
+  });
+
   const api: GameUiContext = {
     hoveredEntity: computed(() => {
       if (!hoveredPosition.value) return null;

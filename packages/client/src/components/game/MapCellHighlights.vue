@@ -8,7 +8,7 @@ const { session, assets, camera, ui, state, pathfinding } = useGame();
 const movementTileset = computed(() => assets.getSpritesheet('bitmask-movement-ally'));
 const attackTileset = computed(() => assets.getSpritesheet('bitmask-danger'));
 
-const isMovementHighlightDisplayed = (cell: Cell) => {
+const matchMovement = (cell: Cell) => {
   return match(ui.targetingMode.value)
     .with(TARGETING_MODES.ATTACK, TARGETING_MODES.SKILL, () => false)
     .with(TARGETING_MODES.MOVE, () => {
@@ -18,13 +18,13 @@ const isMovementHighlightDisplayed = (cell: Cell) => {
     })
     .with(TARGETING_MODES.NONE, () => {
       if (!ui.hoveredEntity.value) return false;
-      if (ui.hoveredEntity.value.isActive) return false;
+      if (!ui.hoveredEntity.value.isActive) return false;
       return pathfinding.canMoveTo(ui.hoveredEntity.value, cell);
     })
     .exhaustive();
 };
 
-const isDangerHighlightDisplayed = (cell: Cell) => {
+const matchAttack = (cell: Cell) => {
   return match(ui.targetingMode.value)
     .with(TARGETING_MODES.ATTACK, TARGETING_MODES.SKILL, () => false)
     .with(TARGETING_MODES.MOVE, TARGETING_MODES.NONE, () => {
@@ -35,11 +35,14 @@ const isDangerHighlightDisplayed = (cell: Cell) => {
     .exhaustive();
 };
 
+const isMovementDisplayed = computed(() => matchMovement(cell));
+const isAttackDisplayed = computed(() => matchAttack(cell));
+
 const movementBitmask = computed(() => {
   return getBitMask(session, cell, camera.angle.value, neighbor => {
     if (!neighbor) return false;
 
-    return isMovementHighlightDisplayed(neighbor);
+    return matchMovement(neighbor);
   });
 });
 
@@ -47,7 +50,7 @@ const attackBitmask = computed(() => {
   return getBitMask(session, cell, camera.angle.value, neighbor => {
     if (!neighbor) return false;
 
-    return isDangerHighlightDisplayed(neighbor);
+    return matchAttack(neighbor);
   });
 });
 
@@ -75,14 +78,15 @@ const { autoDestroyRef } = useAutoDestroy();
     :leave="{ alpha: 0 }"
   >
     <container
-      v-if="movementTexture && isMovementHighlightDisplayed(cell)"
+      v-if="movementTexture && isMovementDisplayed"
       :ref="container => autoDestroyRef(container)"
       event-mode="none"
     >
       <sprite :texture="movementTexture" :anchor="0.5" />
     </container>
+
     <container
-      v-if="dangerTexture && isDangerHighlightDisplayed(cell)"
+      v-if="dangerTexture && isAttackDisplayed"
       :ref="container => autoDestroyRef(container)"
       event-mode="none"
     >

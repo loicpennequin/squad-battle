@@ -61,12 +61,25 @@ const session = GameSession.createClientSession(state, 'seed');
 session.onReady(() => {
   session.transitionToBattle();
 });
+
+const dispatch = (
+  type: Parameters<(typeof session)['dispatch']>[0]['type'],
+  payload: any
+) => {
+  session.dispatch({
+    type,
+    payload: {
+      ...payload,
+      playerId: session.atbSystem.activeEntity.player.id
+    }
+  });
+};
 </script>
 
 <template>
   <div class="overflow-hidden">
     <ClientOnly>
-      <Game :game-session="session" />
+      <Game :game-session="session" @move="dispatch('move', $event)" />
       <template #fallback><div /></template>
     </ClientOnly>
   </div>
