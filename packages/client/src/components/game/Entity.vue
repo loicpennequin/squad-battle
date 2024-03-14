@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { OutlineFilter } from '@pixi/filter-outline';
 import { AdvancedBloomFilter } from '@pixi/filter-advanced-bloom';
-import shape from '@/assets/hitboxes/test.json';
 import type { Entity } from '@game/sdk';
 import type { Filter } from 'pixi.js';
 import { Hitbox } from '~/utils/hitbox';
@@ -54,6 +53,7 @@ const filters = computed(() => {
   return result;
 });
 
+const shape = assets.getHitbox(entity.blueprint.spriteId);
 const hitArea = Hitbox.from(shape.shapes[0].points, shape.shapes[0].source, 0.5);
 
 const scaleX = computed(() => {

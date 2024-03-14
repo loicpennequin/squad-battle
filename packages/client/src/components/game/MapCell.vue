@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import shape from '@/assets/hitboxes/tile.json';
 import type { Cell } from '@game/sdk';
 import { ColorOverlayFilter } from '@pixi/filter-color-overlay';
 import { match } from 'ts-pattern';
@@ -16,6 +15,7 @@ const textures = computed(() => {
 
 const isHovered = computed(() => ui.hoveredCell.value?.equals(cell));
 
+const shape = assets.getHitbox('tile');
 const hitArea = Hitbox.from(shape.shapes[0].points, shape.shapes[0].source, 0.5);
 
 const pathFilter = new ColorOverlayFilter(0x4455bb, 0.5);

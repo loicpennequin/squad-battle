@@ -16,6 +16,18 @@ const loadParserByAssetType = {
   interactables: SPRITESHEET_PARSER,
   fx: SPRITESHEET_PARSER,
   modifiers: SPRITESHEET_PARSER,
+  hitboxes: undefined,
+};
+const prefixByAssetType = {
+  tilesets: "",
+  skills: "",
+  units: "",
+  tiles: "",
+  ui: "",
+  interactables: "",
+  fx: "",
+  modifiers: "",
+  hitboxes: "hitbox-",
 };
 
 function manifestEntryParser(tree, processor) {
@@ -28,8 +40,10 @@ function manifestEntryParser(tree, processor) {
     const loadParser = loadParserByAssetType[assetType];
 
     const assetName = name.split("/").at(-1);
+    const prefix = prefixByAssetType[assetType];
     const res = {
-      alias: name.endsWith(".json") ? path.trimExt(assetName) : assetName,
+      alias:
+        prefix + (name.endsWith(".json") ? path.trimExt(assetName) : assetName),
       src: file.paths.map(
         (path) => `/assets/${processor.trimOutputPath(path)}`
       ),

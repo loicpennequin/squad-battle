@@ -7,6 +7,7 @@ export type SpritesheetWithAnimations = Spritesheet & {
 export type AssetsContext = {
   getSpritesheet(key: string, falback?: string): SpritesheetWithAnimations;
   getTexture(key: string): Texture;
+  getHitbox(key: string): any;
   load: () => Promise<void>;
 };
 
@@ -25,7 +26,8 @@ export const useAssetsProvider = () => {
       Assets.loadBundle('units'),
       Assets.loadBundle('tilesets'),
       Assets.loadBundle('interactables'),
-      Assets.loadBundle('fx')
+      Assets.loadBundle('fx'),
+      Assets.loadBundle('hitboxes')
     ]);
   };
 
@@ -36,6 +38,9 @@ export const useAssetsProvider = () => {
     },
     getTexture(key: string) {
       return Assets.get<Texture>(key);
+    },
+    getHitbox(key) {
+      return Assets.get<any>(`hitbox-${key}`);
     }
   };
 

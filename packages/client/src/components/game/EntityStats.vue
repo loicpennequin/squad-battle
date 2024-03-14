@@ -2,10 +2,11 @@
 import { clamp } from '@game/shared';
 import { config, type Entity } from '@game/sdk';
 import { Graphics } from 'pixi.js';
+import { Container } from 'postcss';
 
 const { entity } = defineProps<{ entity: Entity }>();
 
-const { assets } = useGame();
+const { assets, ui } = useGame();
 
 const sheet = assets.getSpritesheet('entity-stat-bars');
 
@@ -45,7 +46,11 @@ watch(
 </script>
 
 <template>
-  <container :y="-CELL_HEIGHT * 1.15" :x="-CELL_WIDTH * 0.3">
+  <container
+    :ref="(container: any) => ui.assignLayer(container, 'ui')"
+    :y="-CELL_HEIGHT * 1.15"
+    :x="-CELL_WIDTH * 0.3"
+  >
     <pixi-graphics
       ref="mask"
       @render="

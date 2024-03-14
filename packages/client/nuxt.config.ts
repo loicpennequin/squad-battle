@@ -50,10 +50,6 @@ export default defineNuxtConfig({
       }
     }
   },
-  sourcemap: {
-    server: true,
-    client: true
-  },
   vite: {
     plugins: [glsl()],
     vue: {

@@ -1,5 +1,7 @@
 import type { Cell, Entity, EntityId, GameSession } from '@game/sdk';
 import type { Nullable, Point3D, Values } from '@game/shared';
+import type { Layer } from '@pixi/layers';
+import type { DisplayObject } from 'pixi.js';
 import { match } from 'ts-pattern';
 import type { InjectionKey } from 'vue';
 
@@ -11,6 +13,7 @@ export const TARGETING_MODES = {
 } as const;
 
 type TargetingMode = Values<typeof TARGETING_MODES>;
+type LayerName = 'ui' | 'scene';
 
 export type GameUiContext = {
   hoveredCell: ComputedRef<Nullable<Cell>>;
@@ -22,6 +25,8 @@ export type GameUiContext = {
   select(id: EntityId): void;
   unselect(): void;
   switchTargetingMode(mode: TargetingMode): void;
+  layers: Record<LayerName, Ref<Layer | undefined>>;
+  assignLayer(obj: Nullable<DisplayObject>, layer: LayerName): void;
 };
 
 const GAME_UI_INJECTION_KEY = Symbol('iso-camera') as InjectionKey<GameUiContext>;
@@ -31,11 +36,20 @@ export const useGameUiProvider = (session: GameSession) => {
   const selectedEntityId = ref<Nullable<EntityId>>(null);
   const targetingMode = ref<TargetingMode>(TARGETING_MODES.NONE);
 
+  const layers: Record<LayerName, Ref<Layer | undefined>> = {
+    ui: ref(),
+    scene: ref()
+  };
   session.on('game:action', () => {
     targetingMode.value = TARGETING_MODES.NONE;
   });
 
   const api: GameUiContext = {
+    layers,
+    assignLayer(obj, layer) {
+      if (!isDefined(obj)) return;
+      obj.parentLayer = layers[layer].value;
+    },
     hoveredEntity: computed(() => {
       if (!hoveredPosition.value) return null;
       return session.entitySystem.getEntityAt(hoveredPosition.value);
