@@ -49,6 +49,7 @@ watch(
     :ref="(container: any) => ui.assignLayer(container, 'ui')"
     :y="-CELL_HEIGHT * 1.15"
     :x="-CELL_WIDTH * 0.3"
+    event-mode="none"
   >
     <pixi-graphics
       ref="mask"

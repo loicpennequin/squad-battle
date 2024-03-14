@@ -60,6 +60,13 @@ export const useGameProvider = (session: GameSession, emit: ShortEmits<GameEmits
     emit(type, payload);
   };
 
+  watch(
+    () => state.value.activeEntity.id,
+    () => {
+      ui.unselect();
+    }
+  );
+
   session.on('game:action', () => {
     state.value = session.getState();
     // if (action.name === 'END_TURN') {

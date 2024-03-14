@@ -25,6 +25,20 @@ useEventListener('keydown', e => {
     camera.rotateCCW();
   } else if (e.code === 'KeyE') {
     camera.rotateCW();
+  } else if (e.code === 'Space') {
+    const pos = toIso(
+      state.value.activeEntity.position,
+      camera.angle.value,
+      state.value.map
+    );
+    screenViewport.value?.animate({
+      time: 300,
+      ease: 'easeOutQuint',
+      position: {
+        x: pos.isoX + containerOffset?.value.x,
+        y: pos.isoY + containerOffset.value.y
+      }
+    });
   }
 });
 
@@ -92,8 +106,8 @@ until(screenViewport)
       .clamp({
         direction: 'all'
       })
-      .clampZoom({ minScale: 2, maxScale: 3 })
-      .zoomPercent(0, false)
+      .clampZoom({ minScale: 1, maxScale: 3 })
+      .zoomPercent(1, false)
       .moveCenter(
         isoCenter.value.isoX + containerOffset.value.x,
         isoCenter.value.isoY + containerOffset.value.y - CELL_HEIGHT / 2

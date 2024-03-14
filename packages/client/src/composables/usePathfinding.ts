@@ -35,19 +35,27 @@ export const usePathfindingProvider = (session: GameSession) => {
       return entity.canMove(distanceMap.get(point));
     },
     canAttackAt(entity, point) {
+      // if (!maxApCache.has(entity.id)) {
+      //   const dm = session.map.getDistanceMap(entity.position, entity.maxAp);
+      //   maxApCache.set(entity.id, dm);
+      // }
+
+      // const distanceMap = maxApCache.get(entity.id)!;
+
+      // return session.map.getNeighbors(point).some(cell => {
+      //   return (
+      //     entity.canMove(distanceMap.get(cell), entity.maxAp) &&
+      //     entity.canAttackAt(point, cell)
+      //   );
+      // });
+
       if (!maxApCache.has(entity.id)) {
         const dm = session.map.getDistanceMap(entity.position, entity.maxAp);
         maxApCache.set(entity.id, dm);
       }
-
       const distanceMap = maxApCache.get(entity.id)!;
 
-      return session.map.getNeighbors(point).some(cell => {
-        return (
-          entity.canMove(distanceMap.get(cell), entity.maxAp) &&
-          entity.canAttackAt(point, cell)
-        );
-      });
+      return entity.canMove(distanceMap.get(point), entity.maxAp);
     }
   };
 

@@ -1,8 +1,9 @@
 <script setup lang="ts">
+import { PTransition, EasePresets } from 'vue3-pixi';
 import { OutlineFilter } from '@pixi/filter-outline';
 import { AdvancedBloomFilter } from '@pixi/filter-advanced-bloom';
 import type { Entity } from '@game/sdk';
-import type { Filter } from 'pixi.js';
+import type { Container, Filter } from 'pixi.js';
 import { Hitbox } from '~/utils/hitbox';
 
 const { entity } = defineProps<{ entity: Entity }>();
@@ -64,6 +65,24 @@ const scaleX = computed(() => {
 
   return value;
 });
+
+const isEnterAnimationDone = ref(false);
+const onEnter = (container: Container) => {
+  container.y = -200;
+  container.alpha = 0;
+  gsap.to(container, {
+    y: 0,
+    duration: 1,
+    ease: Bounce.easeOut,
+    delay: Math.random() * 0.5,
+    onStart() {
+      container.alpha = 1;
+    },
+    onComplete() {
+      isEnterAnimationDone.value = true;
+    }
+  });
+};
 </script>
 
 <template>
@@ -76,30 +95,41 @@ const scaleX = computed(() => {
     :width="state.map.width"
   >
     <container :y="-CELL_HEIGHT / 4">
-      <EntityStats :entity="entity" />
+      <PTransition
+        appear
+        :before-enter="{ alpha: 0 }"
+        ,
+        :enter="{ alpha: 1 }"
+        :duration="{ leave: 0, enter: 500 }"
+      >
+        <EntityStats v-if="isEnterAnimationDone" :entity="entity" />
+      </PTransition>
 
-      <animated-sprite
-        v-if="isActive"
-        :textures="activeTexture"
-        event-mode="none"
-        :anchor="0.5"
-        :scale-x="scaleX"
-        playing
-      />
-      <animated-sprite
-        :textures="textures"
-        :filters="filters"
-        :hit-area="hitArea"
-        :anchor="0.5"
-        :scale-x="scaleX"
-        @pointerenter="
-          () => {
-            ui.hoverAt(entity.position);
-          }
-        "
-        @pointerup="isSelected ? ui.unselect() : ui.select(entity.id)"
-      />
+      <PTransition appear :duration="{ enter: 1000, leave: 0 }" @enter="onEnter">
+        <container>
+          <animated-sprite
+            v-if="isActive"
+            :textures="activeTexture"
+            event-mode="none"
+            :anchor="0.5"
+            :scale-x="scaleX"
+            playing
+          />
+          <animated-sprite
+            :textures="textures"
+            :filters="filters"
+            :hit-area="hitArea"
+            :anchor="0.5"
+            :scale-x="scaleX"
+            @pointerenter="
+              () => {
+                ui.hoverAt(entity.position);
+              }
+            "
+            @pointerup="isSelected ? ui.unselect() : ui.select(entity.id)"
+          />
+        </container>
+      </PTransition>
     </container>
   </IsoPositioner>
 </template>
-~/utils/hitbox

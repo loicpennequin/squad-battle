@@ -56,7 +56,7 @@ export const useFXProvider = () => {
             y: point.y,
             z: point.z,
             duration,
-            ease: Power0.easeNone
+            ease: Power1.easeOut
           });
         }
 
