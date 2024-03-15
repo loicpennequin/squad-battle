@@ -81,6 +81,10 @@ export class EntitySystem {
         this.session.emit(`entity:${eventName}`, event);
       });
     });
+
+    entity.on('destroyed', () => {
+      this.removeEntity(entity);
+    });
   }
 
   addEntity(rawEntity: Omit<SerializedEntity, 'id'>) {

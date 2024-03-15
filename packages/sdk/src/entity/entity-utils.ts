@@ -41,7 +41,10 @@ export const isEnemy = (
 };
 
 export const isEmpty = (session: GameSession, point: Point3D) => {
-  return !session.entitySystem.getEntityAt(point);
+  return (
+    !session.entitySystem.getEntityAt(point) &&
+    !session.obstacleSystem.getObstacleAt(point)
+  );
 };
 
 export const pointsToEntities = (session: GameSession, points: Point3D[]): Entity[] =>

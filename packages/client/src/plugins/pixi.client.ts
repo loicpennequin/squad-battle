@@ -14,7 +14,7 @@ export default defineNuxtPlugin(async () => {
 
   renderer.use({
     name: 'Layer',
-    createElement: () => new Layer(),
+    createElement: props => new Layer(props.group),
     patchProp(el, key, prevValue, nextValue) {
       return patchProp(el, key, prevValue, nextValue);
     }

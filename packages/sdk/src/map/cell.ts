@@ -49,7 +49,7 @@ export class Cell implements Serializable {
   }
 
   get isWalkable() {
-    return true;
+    return this.terrain === 'ground';
   }
 
   serialize() {

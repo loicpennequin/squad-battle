@@ -16,6 +16,8 @@ import type { Player, SerializedPlayer } from './player/player';
 import { ActionSystem } from './action/action-system';
 import randoomSeed from 'seedrandom';
 import { noopFXContext, type FXSystem } from './fx-system';
+import type { Obstacle, SerializedObstacle } from './obstacle/obstacle';
+import { ObstacleSystem } from './obstacle/obstacle-system';
 
 export type GameState = {
   map: Pick<GameMap, 'height' | 'width' | 'cells'>;
@@ -25,11 +27,13 @@ export type GameState = {
   activeEntity: Entity;
   history: GameAction<any>[];
   phase: GamePhase;
+  obstacles: Obstacle[];
 };
 
 export type SerializedGameState = {
   map: GameMapOptions;
   entities: Array<SerializedEntity>;
+  obstacles: SerializedObstacle[];
   players: [SerializedPlayer, SerializedPlayer];
   history: SerializedAction[];
   activeEntityId: Nullable<EntityId>;
@@ -87,6 +91,8 @@ export class GameSession extends EventEmitter<GlobalGameEvents> {
 
   playerSystem = new PlayerSystem(this);
 
+  obstacleSystem = new ObstacleSystem(this);
+
   map = new GameMap(this);
 
   isReady = false;
@@ -118,6 +124,7 @@ export class GameSession extends EventEmitter<GlobalGameEvents> {
     this.phase = this.initialState.phase;
 
     this.map.setup(this.initialState.map);
+    this.obstacleSystem.setup(this.initialState.obstacles);
     this.playerSystem.setup(this.initialState.players);
     this.entitySystem.setup(this.initialState.entities);
     this.atbSystem.setup(this.initialState.activeEntityId);
@@ -138,6 +145,7 @@ export class GameSession extends EventEmitter<GlobalGameEvents> {
         cells: this.map.cells.map(cell => cell.clone())
       },
       entities: this.entitySystem.getList().map(entity => entity.clone()),
+      obstacles: this.obstacleSystem.getList().map(obstacle => obstacle.clone()),
       players: this.playerSystem.getList().map(player => player.clone()),
       activeEntity: this.atbSystem.activeEntity,
       history: this.actionSystem.getHistory(),
@@ -153,11 +161,6 @@ export class GameSession extends EventEmitter<GlobalGameEvents> {
 
   transitionToBattle() {
     this.actionSystem.dispatch({ type: 'startBattle', payload: { playerId: '' } });
-    // this.playerSystem.getList().forEach(player => {
-    //   player.deployTeam();
-    // });
-    // this.atbSystem.tickUntilActiveEntity(this.entitySystem.getList());
-    // this.phase = GAME_PHASES.BATTLE;
   }
 
   serialize(): SerializedGameState {

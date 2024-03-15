@@ -11,6 +11,8 @@ export type FXSystem = {
 
   attack(attackerId: EntityId, targetId: EntityId): Promise<void>;
 
+  fadeOutEntity(entityId: EntityId, duration: number): Promise<void>;
+
   displayText(
     text: string,
     entityId: EntityId,
@@ -37,7 +39,7 @@ export const noopFXContext: FXSystem = {
     return Promise.resolve();
   },
 
-  displayDamageIndicator(from, to, amount) {
+  displayDamageIndicator() {
     return Promise.resolve();
   },
 
@@ -50,6 +52,10 @@ export const noopFXContext: FXSystem = {
   },
 
   attack() {
+    return Promise.resolve();
+  },
+
+  fadeOutEntity() {
     return Promise.resolve();
   }
 };

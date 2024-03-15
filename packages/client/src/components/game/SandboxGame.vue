@@ -7,6 +7,23 @@ const state: SerializedGameState = {
   activeEntityId: null,
   history: [],
   phase: 'deploy',
+  obstacles: [
+    {
+      id: 1,
+      spriteId: 'tree',
+      position: { x: 6, y: 7, z: 0 }
+    },
+    {
+      id: 2,
+      spriteId: 'tree',
+      position: { x: 4, y: 3, z: 1 }
+    },
+    {
+      id: 3,
+      spriteId: 'tree',
+      position: { x: 3, y: 3, z: 1 }
+    }
+  ],
   map: {
     height: HEIGHT,
     width: WIDTH,

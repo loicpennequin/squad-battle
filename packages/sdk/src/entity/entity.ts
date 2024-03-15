@@ -189,6 +189,14 @@ export class Entity extends EventEmitter<EntityEventMap> implements Serializable
     return this.interceptors.initiative.getValue(this.blueprint.initiative, this);
   }
 
+  get isActive() {
+    const activeEntity = this.session.atbSystem.activeEntity;
+
+    if (!activeEntity) return false;
+
+    return this.equals(activeEntity);
+  }
+
   canMove(distance: number, simulatedAp?: number) {
     return this.interceptors.canMove.getValue(distance <= (simulatedAp ?? this.ap), this);
   }
@@ -317,13 +325,5 @@ export class Entity extends EventEmitter<EntityEventMap> implements Serializable
 
   isEnemy(entityId: EntityId) {
     return isEnemy(this.session, entityId, this.playerId);
-  }
-
-  get isActive() {
-    const activeEntity = this.session.atbSystem.activeEntity;
-
-    if (!activeEntity) return false;
-
-    return this.equals(activeEntity);
   }
 }
