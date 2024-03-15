@@ -3,7 +3,7 @@ import { PTransition } from 'vue3-pixi';
 import { OutlineFilter } from '@pixi/filter-outline';
 import { AdvancedBloomFilter } from '@pixi/filter-advanced-bloom';
 import type { Entity } from '@game/sdk';
-import type { Container, Filter } from 'pixi.js';
+import { Container, type Filter } from 'pixi.js';
 import { Hitbox } from '~/utils/hitbox';
 import { match } from 'ts-pattern';
 
@@ -27,7 +27,9 @@ const hoveredFilters = [
     threshold: 0.75
   }),
   new OutlineFilter(2, 0xffffff, 0.2, 0)
-];
+] as const;
+
+const activeFilter = new OutlineFilter(2, 0xffffff, 0.2, 1);
 
 const isHovered = computed(() => ui.hoveredEntity.value?.equals(entity));
 const isActive = computed(() => state.value.activeEntity.equals(entity));
@@ -45,12 +47,22 @@ watchEffect(() => {
   });
 });
 
+watchEffect(() => {
+  hoveredFilters[1].color =
+    ui.targetingMode.value === TARGETING_MODES.BASIC &&
+    state.value.activeEntity.isEnemy(entity.id)
+      ? 0xff0000
+      : 0xffffff;
+});
+
 const filters = computed(() => {
   const result: Filter[] = [];
   if (isHovered.value) {
     result.push(...hoveredFilters);
   }
-
+  if (isActive.value) {
+    result.push(activeFilter);
+  }
   return result;
 });
 
@@ -83,6 +95,31 @@ const onEnter = (container: Container) => {
     }
   });
 };
+
+const onPointerup = () => {
+  match(ui.targetingMode.value)
+    .with(TARGETING_MODES.NONE, () => {
+      if (entity.equals(state.value.activeEntity)) {
+        ui.switchTargetingMode(TARGETING_MODES.BASIC);
+      }
+    })
+    .with(TARGETING_MODES.BASIC, () => {
+      if (entity.equals(state.value.activeEntity)) {
+        ui.switchTargetingMode(TARGETING_MODES.NONE);
+        return;
+      }
+
+      if (
+        entity.isEnemy(state.value.activeEntity.id) &&
+        state.value.activeEntity.canAttack(entity) &&
+        entity.canBeAttacked(state.value.activeEntity)
+      ) {
+        dispatch('attack', { targetId: entity.id });
+      }
+    })
+    .with(TARGETING_MODES.SKILL, () => ({}))
+    .exhaustive();
+};
 </script>
 
 <template>
@@ -93,8 +130,20 @@ const onEnter = (container: Container) => {
     :angle="camera.angle.value"
     :height="state.map.height"
     :width="state.map.width"
+    :offset="{
+      x: 0,
+      y: -CELL_HEIGHT / 4
+    }"
   >
-    <container :y="-CELL_HEIGHT / 4">
+    <container
+      :ref="
+        (container: any) => {
+          if (container?.parent) {
+            fx.registerEntityRootContainer(entity.id, container.parent);
+          }
+        }
+      "
+    >
       <PTransition
         appear
         :before-enter="{ alpha: 0 }"
@@ -118,6 +167,7 @@ const onEnter = (container: Container) => {
             playing
           />
           <animated-sprite
+            :ref="(el: any) => fx.registerSprite(entity.id, el)"
             :textures="textures"
             :filters="filters"
             :hit-area="hitArea"
@@ -128,32 +178,7 @@ const onEnter = (container: Container) => {
                 ui.hoverAt(entity.position);
               }
             "
-            @pointerup="
-              () => {
-                match(ui.targetingMode.value)
-                  .with(TARGETING_MODES.NONE, () => {
-                    if (entity.equals(state.activeEntity)) {
-                      ui.switchTargetingMode(TARGETING_MODES.BASIC);
-                    }
-                  })
-                  .with(TARGETING_MODES.BASIC, () => {
-                    if (entity.equals(state.activeEntity)) {
-                      ui.switchTargetingMode(TARGETING_MODES.NONE);
-                      return;
-                    }
-
-                    if (
-                      entity.isEnemy(state.activeEntity.id) &&
-                      state.activeEntity.canAttack(entity) &&
-                      entity.canBeAttacked(state.activeEntity)
-                    ) {
-                      dispatch('attack', { targetId: entity.id });
-                    }
-                  })
-                  .with(TARGETING_MODES.SKILL, () => {})
-                  .exhaustive();
-              }
-            "
+            @pointerup="onPointerup"
           />
         </container>
       </PTransition>

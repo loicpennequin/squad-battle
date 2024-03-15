@@ -56,6 +56,8 @@ export const useGameProvider = (session: GameSession, emit: ShortEmits<GameEmits
 
   const state = ref(session.getState()) as Ref<GameState>;
   fx.provideState(state);
+  fx.provideSession(session);
+  fx.provideUi(ui);
 
   watch(
     () => state.value.activeEntity.id,

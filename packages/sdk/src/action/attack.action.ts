@@ -25,6 +25,20 @@ export class AttackAction extends GameAction<typeof schema> {
 
     this.session.atbSystem.activeEntity.performAttack(target);
 
+    this.session.fxSystem.displayText(
+      String(target?.getTakenDamage(this.session.atbSystem.activeEntity.attack)),
+      target.id,
+      {
+        color: 0xff0000,
+        duration: 1,
+        path: [
+          { x: 0, y: -64, alpha: 0, scale: 0 },
+          { x: 0, y: -96, alpha: 0, scale: 1 },
+          { x: 0, y: -96, alpha: 1, scale: 1 }
+        ]
+      }
+    );
+
     return Promise.resolve();
   }
 }

@@ -3,11 +3,12 @@ import { useApplication } from 'vue3-pixi';
 import { type Viewport } from 'pixi-viewport';
 import { CELL_HEIGHT, CELL_WIDTH } from '@/utils/constants';
 import { pointToIndex } from '@game/shared';
+import { Container } from 'pixi.js';
 
 const app = useApplication();
 const screenViewport = shallowRef<Viewport>();
 
-const { state } = useGame();
+const { state, fx } = useGame();
 
 // watchEffect(() => {
 //   if (gameObjectsLayer.value) {
@@ -154,7 +155,17 @@ until(screenViewport)
         }
       "
     />
-    <container :sortable-children="true" v-bind="containerOffset">
+    <container
+      v-bind="containerOffset"
+      :ref="
+        (container: any) => {
+          if (container instanceof Container) {
+            fx.registerRoot(container);
+          }
+        }
+      "
+      :sortable-children="true"
+    >
       <slot />
     </container>
   </viewport>

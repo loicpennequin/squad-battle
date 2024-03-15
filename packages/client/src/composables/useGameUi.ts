@@ -2,7 +2,6 @@ import type { Cell, Entity, EntityId, GameSession } from '@game/sdk';
 import type { Nullable, Point3D, Values } from '@game/shared';
 import type { Layer } from '@pixi/layers';
 import type { DisplayObject } from 'pixi.js';
-import { match } from 'ts-pattern';
 import type { InjectionKey } from 'vue';
 
 export const TARGETING_MODES = {
