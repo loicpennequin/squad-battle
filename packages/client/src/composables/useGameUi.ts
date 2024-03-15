@@ -7,8 +7,7 @@ import type { InjectionKey } from 'vue';
 
 export const TARGETING_MODES = {
   NONE: 'NONE',
-  MOVE: 'MOVE',
-  ATTACK: 'ATTACK',
+  BASIC: 'BASIC',
   SKILL: 'SKILL'
 } as const;
 
@@ -40,8 +39,8 @@ export const useGameUiProvider = (session: GameSession) => {
     ui: ref(),
     scene: ref()
   };
-  session.on('game:action', () => {
-    targetingMode.value = TARGETING_MODES.NONE;
+  session.on('entity:turn-ended', () => {
+    api.unselect();
   });
 
   const api: GameUiContext = {
@@ -75,15 +74,16 @@ export const useGameUiProvider = (session: GameSession) => {
     }),
     select(id) {
       selectedEntityId.value = id;
-      targetingMode.value = TARGETING_MODES.MOVE;
+      targetingMode.value = TARGETING_MODES.BASIC;
     },
     unselect() {
       selectedEntityId.value = null;
       targetingMode.value = TARGETING_MODES.NONE;
     },
     switchTargetingMode(mode) {
+      console.log(mode);
       match(mode)
-        .with(TARGETING_MODES.ATTACK, TARGETING_MODES.SKILL, TARGETING_MODES.MOVE, () => {
+        .with(TARGETING_MODES.BASIC, TARGETING_MODES.SKILL, () => {
           if (!selectedEntityId.value) {
             throw new Error('cannot switch targeting mode without a selectedEntity.');
           }

@@ -18,6 +18,7 @@ export class EntitySystem {
     entities.forEach(rawEntity => {
       const entity = new Entity(this.session, rawEntity);
       this.entityMap.set(entity.id, entity);
+      this.setupListeners(entity);
     });
     if (entities.length) {
       this.nextEntityId = Math.max(...this.getList().map(e => e.id));
@@ -86,7 +87,7 @@ export class EntitySystem {
     const id = ++this.nextEntityId;
     const entity = new Entity(this.session, { ...rawEntity, id });
     this.entityMap.set(id, entity);
-
+    this.setupListeners(entity);
     return entity;
   }
 

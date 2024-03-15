@@ -10,8 +10,8 @@ const attackTileset = computed(() => assets.getSpritesheet('bitmask-danger'));
 
 const matchMovement = (cellToTest: Cell) => {
   return match(ui.targetingMode.value)
-    .with(TARGETING_MODES.ATTACK, TARGETING_MODES.SKILL, () => false)
-    .with(TARGETING_MODES.MOVE, () => {
+    .with(TARGETING_MODES.SKILL, () => false)
+    .with(TARGETING_MODES.BASIC, () => {
       if (!ui.selectedEntity.value) return false;
       if (!ui.selectedEntity.value.isActive) return false;
       return pathfinding.canMoveTo(ui.selectedEntity.value, cellToTest);
@@ -26,8 +26,8 @@ const matchMovement = (cellToTest: Cell) => {
 
 const matchAttack = (cell: Cell) => {
   return match(ui.targetingMode.value)
-    .with(TARGETING_MODES.ATTACK, TARGETING_MODES.SKILL, () => false)
-    .with(TARGETING_MODES.MOVE, TARGETING_MODES.NONE, () => {
+    .with(TARGETING_MODES.BASIC, TARGETING_MODES.SKILL, () => false)
+    .with(TARGETING_MODES.NONE, () => {
       if (!ui.hoveredEntity.value) return false;
       if (ui.hoveredEntity.value.isAlly(state.value.activeEntity.id)) return false;
       return pathfinding.canAttackAt(ui.hoveredEntity.value, cell);
@@ -84,7 +84,15 @@ const { autoDestroyRef } = useAutoDestroy();
     >
       <sprite :texture="movementTexture" :anchor="0.5" />
     </container>
+  </PTransition>
 
+  <PTransition
+    appear
+    :duration="{ enter: 300, leave: 300 }"
+    :before-enter="{ alpha: 0 }"
+    :enter="{ alpha: 1 }"
+    :leave="{ alpha: 0 }"
+  >
     <container
       v-if="dangerTexture && isAttackDisplayed"
       :ref="container => autoDestroyRef(container)"

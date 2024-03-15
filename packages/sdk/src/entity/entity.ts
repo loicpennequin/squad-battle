@@ -197,7 +197,10 @@ export class Entity extends EventEmitter<EntityEventMap> implements Serializable
   canAttack(target: Entity) {
     if (!this.canAttackAt(target.position)) return false;
 
-    const baseValue = this.ap > 0;
+    const baseValue =
+      this.canAttackAt(target.position) &&
+      this.ap > 0 &&
+      isEnemy(this.session, target.id, this.playerId);
 
     return (
       this.interceptors.canAttack.getValue(baseValue, { entity: this, target }) &&

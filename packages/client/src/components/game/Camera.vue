@@ -57,7 +57,7 @@ const isoBoundingRect = computed(() => ({
 }));
 
 const WORLD_PADDING = {
-  x: CELL_WIDTH * 2,
+  x: CELL_WIDTH * 4,
   y: CELL_HEIGHT * 5
 };
 const worldSize = computed(() => ({
@@ -91,6 +91,11 @@ const isoCenter = computed(() => {
 until(screenViewport)
   .not.toBe(undefined)
   .then(() => {
+    const center = toIso(
+      state.value.activeEntity.position,
+      camera.angle.value,
+      state.value.map
+    );
     screenViewport.value
       ?.drag({
         mouseButtons: 'right'
@@ -107,11 +112,23 @@ until(screenViewport)
         direction: 'all'
       })
       .clampZoom({ minScale: 1, maxScale: 3 })
-      .zoomPercent(1, false)
+      .zoomPercent(0.5, false)
       .moveCenter(
         isoCenter.value.isoX + containerOffset.value.x,
         isoCenter.value.isoY + containerOffset.value.y - CELL_HEIGHT / 2
       );
+
+    setTimeout(() => {
+      screenViewport.value?.animate({
+        time: 1000,
+        ease: 'easeInOutCubic',
+        position: {
+          x: center.isoX + containerOffset?.value.x,
+          y: center.isoY + containerOffset.value.y
+        },
+        scale: 2
+      });
+    }, 800);
   });
 </script>
 

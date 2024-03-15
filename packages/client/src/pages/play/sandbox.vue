@@ -53,7 +53,7 @@ const state: SerializedGameState = {
       deployment: [
         {
           characterId: 'test',
-          position: { x: 1, y: 1, z: 1 }
+          position: { x: 3, y: 4, z: 1 }
         }
       ]
     },
@@ -64,7 +64,7 @@ const state: SerializedGameState = {
       deployment: [
         {
           characterId: 'test2',
-          position: { x: 8, y: 8, z: 0 }
+          position: { x: 5, y: 5, z: 0 }
         }
       ]
     }
@@ -92,10 +92,12 @@ const dispatch = (
 </script>
 
 <template>
-  <div class="overflow-hidden">
+  <div class="overflow-hidden" style="background: black">
     <ClientOnly>
       <Game :game-session="session" @move="dispatch('move', $event)" />
-      <template #fallback><div /></template>
+      <template #fallback>
+        <div class="overflow-hidden h-screen" style="background: black"></div>
+      </template>
     </ClientOnly>
   </div>
 </template>

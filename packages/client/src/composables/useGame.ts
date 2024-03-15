@@ -63,7 +63,7 @@ export const useGameProvider = (session: GameSession, emit: ShortEmits<GameEmits
   watch(
     () => state.value.activeEntity.id,
     () => {
-      ui.unselect();
+      // ui.unselect();
     }
   );
 

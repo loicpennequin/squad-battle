@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { Cell } from '@game/sdk';
 import { ColorOverlayFilter } from '@pixi/filter-color-overlay';
+import type { Filter } from 'pixi.js';
 import { match } from 'ts-pattern';
 import { Hitbox } from '~/utils/hitbox';
 
@@ -19,9 +20,10 @@ const shape = assets.getHitbox('tile');
 const hitArea = Hitbox.from(shape.shapes[0].points, shape.shapes[0].source, 0.5);
 
 const pathFilter = new ColorOverlayFilter(0x4455bb, 0.5);
+const attackFilter = new ColorOverlayFilter(0xff0000, 0.5);
 const isMovePathHighlighted = computed(() => {
   if (!ui.hoveredCell.value) return false;
-  if (ui.targetingMode.value !== TARGETING_MODES.MOVE) return false;
+  if (ui.targetingMode.value !== TARGETING_MODES.BASIC) return false;
 
   const entityOnCell = session.entitySystem.getEntityAt(cell);
 
@@ -42,10 +44,19 @@ const isMovePathHighlighted = computed(() => {
 });
 
 const filters = computed(() => {
-  if (fx.isPlaying.value) return [];
-  if (isMovePathHighlighted.value) return [pathFilter];
+  const result: Filter[] = [];
+  if (fx.isPlaying.value) return result;
+  if (isMovePathHighlighted.value) result.push(pathFilter);
 
-  return [];
+  if (
+    ui.hoveredCell.value?.equals(cell) &&
+    ui.hoveredEntity.value?.isEnemy(state.value.activeEntity.id) &&
+    state.value.activeEntity.canAttack(ui.hoveredEntity.value) &&
+    ui.targetingMode.value === TARGETING_MODES.BASIC
+  ) {
+    result.push(attackFilter);
+  }
+  return result;
 });
 </script>
 
@@ -68,7 +79,7 @@ const filters = computed(() => {
         @pointerup="
           () => {
             match(ui.targetingMode.value)
-              .with(TARGETING_MODES.MOVE, () => {
+              .with(TARGETING_MODES.BASIC, () => {
                 if (pathfinding.canMoveTo(state.activeEntity, cell)) {
                   dispatch('move', cell.position);
                 } else {
@@ -78,8 +89,6 @@ const filters = computed(() => {
               .otherwise(() => {
                 ui.unselect();
               });
-            if (ui.targetingMode.value === TARGETING_MODES.MOVE) {
-            }
           }
         "
       />
