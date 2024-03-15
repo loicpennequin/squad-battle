@@ -1,4 +1,4 @@
-import type { InjectionKey } from 'nuxt/dist/app/compat/capi';
+import type { InjectionKey } from 'vue';
 import { ConvexClientWithSSR } from '@game/api';
 
 export const CONVEX_CLIENT = Symbol('convex-client') as InjectionKey<ConvexClientWithSSR>;

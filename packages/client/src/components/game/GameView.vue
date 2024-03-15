@@ -12,6 +12,7 @@ const { state, ui } = useGame();
   <Sky />
   <Camera>
     <Layer :ref="(layer: any) => ui.registerLayer(layer, 'scene')">
+      <Underground />
       <MapCell v-for="cell in state.map.cells" :key="cell.id" :cell="cell" />
       <Entity v-for="entity in state.entities" :key="entity.id" :entity="entity" />
     </Layer>

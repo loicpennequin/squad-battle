@@ -55,7 +55,7 @@ const apXOffset = computed(() => {
 <template>
   <container
     :ref="(container: any) => ui.assignLayer(container, 'ui')"
-    :y="-CELL_HEIGHT * 1.3"
+    :y="-CELL_HEIGHT * 1.2"
     :x="-CELL_WIDTH * 0.3"
     event-mode="none"
   >
@@ -96,7 +96,7 @@ const apXOffset = computed(() => {
 
   <container
     :ref="(container: any) => ui.assignLayer(container, 'ui')"
-    :y="-CELL_HEIGHT * 0.95"
+    :y="-CELL_HEIGHT * 0.88"
     :x="apXOffset"
     event-mode="none"
   >

@@ -7,6 +7,10 @@ export type FXSystem = {
     path: Array<{ point: Point3D; duration: number }>
   ): Promise<void>;
 
+  displayDamageIndicator(from: EntityId, to: EntityId, amount: number): Promise<void>;
+
+  attack(attackerId: EntityId, targetId: EntityId): Promise<void>;
+
   displayText(
     text: string,
     entityId: EntityId,
@@ -16,6 +20,16 @@ export type FXSystem = {
       duration: number;
     }
   ): Promise<void>;
+
+  shakeEntity(
+    entityId: EntityId,
+    opts?: {
+      count?: number;
+      axis?: 'x' | 'y' | 'both';
+      amount?: number;
+      totalDuration?: number;
+    }
+  ): Promise<void>;
 };
 
 export const noopFXContext: FXSystem = {
@@ -23,7 +37,19 @@ export const noopFXContext: FXSystem = {
     return Promise.resolve();
   },
 
+  displayDamageIndicator(from, to, amount) {
+    return Promise.resolve();
+  },
+
   displayText() {
+    return Promise.resolve();
+  },
+
+  shakeEntity() {
+    return Promise.resolve();
+  },
+
+  attack() {
     return Promise.resolve();
   }
 };

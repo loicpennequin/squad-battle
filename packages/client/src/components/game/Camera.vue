@@ -112,8 +112,8 @@ until(screenViewport)
       .clamp({
         direction: 'all'
       })
-      .clampZoom({ minScale: 1, maxScale: 3 })
-      .zoomPercent(0.5, false)
+      .clampZoom({ minScale: 2, maxScale: 3 })
+      .zoomPercent(0, false)
       .moveCenter(
         isoCenter.value.isoX + containerOffset.value.x,
         isoCenter.value.isoY + containerOffset.value.y - CELL_HEIGHT / 2

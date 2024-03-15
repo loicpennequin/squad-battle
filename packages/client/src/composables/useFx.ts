@@ -1,8 +1,14 @@
 import type { EntityId, GameSession, GameState } from '@game/sdk';
 import type { FXSystem } from '@game/sdk/src/fx-system';
-import { Container, Text, type AnimatedSprite } from 'pixi.js';
+import { Container, type AnimatedSprite } from 'pixi.js';
 import type { InjectionKey } from 'vue';
 import type { GameUiContext } from './useGameUi';
+import type { AnyFunction } from '@game/shared';
+import { displayText } from './fx/displayText';
+import { shakeEntity } from './fx/shakeEntity';
+import { moveEntity } from './fx/moveEntity';
+import { displayDamageIndicator } from './fx/displayDamageIndicator';
+import { attack } from './fx/attack';
 
 export type FxContext = {
   isPlaying: Ref<boolean>;
@@ -19,6 +25,19 @@ export type FxContext = {
 };
 
 const FX_INJECTION_KEY = Symbol('fx') as InjectionKey<FxContext>;
+
+export type FxCommand<T extends keyof FXSystem> = (
+  ctx: {
+    state: GameState;
+    session: GameSession;
+    ui: GameUiContext;
+    spriteMap: Map<EntityId, MaybeRefOrGetter<AnimatedSprite | undefined>>;
+    entityRootMap: Map<EntityId, Container>;
+    sceneRoot: Container;
+    done: () => void;
+  },
+  ...args: Parameters<FXSystem[T]>
+) => ReturnType<FXSystem[T]> extends Promise<infer U> ? U : ReturnType<FXSystem[T]>;
 
 export const useFXProvider = () => {
   const visibility = useDocumentVisibility();
@@ -50,104 +69,52 @@ export const useFXProvider = () => {
     return { state: provided.state!.value, session: provided.session!, ui: provided.ui! };
   };
 
-  const ctx: FXSystem = {
-    moveEntity(entityId, path) {
-      const { state } = ensureProvided();
+  const executeCommand = <T extends AnyFunction>(cb: T) => {
+    return new Promise<ReturnType<T>>(resolve => {
       if (isHidden.value) return Promise.resolve();
+      const { state, session, ui } = ensureProvided();
+      isPlaying.value = true;
 
-      return new Promise(resolve => {
-        isPlaying.value = true;
-        // we are grabbing the entity from the reactive state instead of entityManager otherwise the movement won't be rendered !
-        // It's ok because the position wil be updated when the action execution is flushed after the fx sequence
-        const entity = state.entities.find(e => e.id === entityId);
-        if (!entity) {
-          console.warn(`FXContext: entity not found for entityId ${entityId}`);
-          return resolve();
-        }
-
-        const timeline = gsap.timeline({
-          onComplete() {
-            // we are waiting for nextTick because we dont want the entity position to be tweened again when the state update from the action happens
-            nextTick(() => {
-              isPlaying.value = false;
-            });
-            resolve();
-          }
-        });
-        for (const { point, duration } of path) {
-          timeline.to(entity.position, {
-            x: point.x,
-            y: point.y,
-            z: point.z,
-            duration,
-            ease: Power1.easeOut
+      return cb({
+        state,
+        session,
+        ui,
+        spriteMap,
+        entityRootMap,
+        sceneRoot,
+        done: (val: ReturnType<T>) => {
+          nextTick(() => {
+            isPlaying.value = false;
+            resolve(val);
           });
         }
-
-        timeline.play();
+      });
+    });
+  };
+  const ctx: FXSystem = {
+    displayText(...args) {
+      return executeCommand(ctx => {
+        displayText(ctx, ...args);
       });
     },
-
-    displayText(text, entityId, { color, path, duration }) {
-      if (isHidden.value) return Promise.resolve();
-
-      return new Promise(resolve => {
-        const { session, ui } = ensureProvided();
-        const entity = session.entitySystem.getEntityById(entityId);
-        if (!entity) {
-          console.warn(`FXContext: entity not found for entityId ${entityId}`);
-          return resolve();
-        }
-
-        const sprite = toValue(spriteMap.get(entityId));
-        if (!sprite) {
-          console.warn(`FXContext: sprite not found for entity ${entityId}`);
-          return resolve();
-        }
-        const root = entityRootMap.get(entityId);
-        if (!root) {
-          console.warn(
-            `FXContext: entity root container not found for entity ${entityId}`
-          );
-          return resolve();
-        }
-
-        const container = new Container();
-
-        const textSprite = new Text(text, {
-          fontSize: 30,
-          fontWeight: '700',
-          fill: color,
-          stroke: 'black',
-          strokeThickness: 4
-        });
-
-        container.addChild(textSprite);
-        // gsap motionpath doesn't work with gsap pixi plugin, so we apply values to a dummy object and update the text on update
-        const sentinel = Object.assign({ x: 0, y: 0, scale: 1, alpha: 1 }, path.shift()!);
-
-        const onUpdate = () => {
-          textSprite.position.set(sentinel.x, sentinel.y);
-          // we divide the scale by 2 to avoid pixelated text since the game is zoomed in by default
-          textSprite.scale.set(sentinel.scale * 0.5, sentinel.scale * 0.5);
-          textSprite.alpha = sentinel.alpha;
-        };
-        onUpdate(); // set starting values on sprite
-
-        ui.assignLayer(container, 'ui');
-        root.addChild(container);
-        gsap.to(sentinel, {
-          motionPath: {
-            path
-          },
-          duration,
-          onUpdate,
-          ease: Power2.easeOut,
-          onComplete: () => {
-            container.destroy();
-            resolve();
-          }
-        });
+    displayDamageIndicator(...args) {
+      return executeCommand(ctx => {
+        displayDamageIndicator(ctx, ...args);
+      });
+    },
+    moveEntity(...args) {
+      return executeCommand(ctx => {
+        moveEntity(ctx, ...args);
+      });
+    },
+    shakeEntity(...args) {
+      return executeCommand(ctx => {
+        shakeEntity(ctx, ...args);
+      });
+    },
+    attack(...args) {
+      return executeCommand(ctx => {
+        attack(ctx, ...args);
       });
     }
   };

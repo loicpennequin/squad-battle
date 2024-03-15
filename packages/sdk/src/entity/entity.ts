@@ -254,7 +254,14 @@ export class Entity extends EventEmitter<EntityEventMap> implements Serializable
     this.emit(ENTITY_EVENTS.TURN_ENDED, this);
   }
 
-  dealDamage(power: number, target: Entity) {
+  getTakenDamage(amount: number) {
+    return this.interceptors.damageTaken.getValue(amount, {
+      entity: this,
+      amount
+    });
+  }
+
+  async dealDamage(power: number, target: Entity) {
     const payload = {
       entity: this,
       amount: power,
@@ -267,19 +274,12 @@ export class Entity extends EventEmitter<EntityEventMap> implements Serializable
     this.emit(ENTITY_EVENTS.AFTER_DEAL_DAMAGE, payload);
   }
 
-  getTakenDamage(amount: number) {
-    return this.interceptors.damageTaken.getValue(amount, {
-      entity: this,
-      amount
-    });
-  }
-
   destroy() {
     this.session.entitySystem.removeEntity(this);
     this.emit('destroyed', this);
   }
 
-  takeDamage(power: number, source: Nullable<Entity>) {
+  async takeDamage(power: number, source: Nullable<Entity>) {
     const amount = this.getTakenDamage(power);
     const payload = {
       entity: this,
@@ -288,10 +288,25 @@ export class Entity extends EventEmitter<EntityEventMap> implements Serializable
     };
     this.emit(ENTITY_EVENTS.BEFORE_TAKE_DAMAGE, payload);
     this.hp -= amount;
+
+    Promise.all([
+      this.session.fxSystem.shakeEntity(this.id, {
+        count: 6,
+        totalDuration: 0.4,
+        axis: 'x',
+        amount: 3
+      }),
+      this.session.fxSystem.displayDamageIndicator(
+        this.session.atbSystem.activeEntity.id,
+        this.id,
+        this.session.atbSystem.activeEntity.attack
+      )
+    ]);
     this.emit(ENTITY_EVENTS.AFTER_TAKE_DAMAGE, payload);
   }
 
-  performAttack(target: Entity) {
+  async performAttack(target: Entity) {
+    await this.session.fxSystem.attack(this.id, target.id);
     this.dealDamage(this.attack, target);
     this.ap--;
   }

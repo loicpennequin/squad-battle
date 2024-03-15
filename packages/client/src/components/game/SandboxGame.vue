@@ -17,7 +17,7 @@ const state: SerializedGameState = {
           y,
           z: 0
         },
-        terrain: x === 0 && y === 0 ? 'water' : 'ground',
+        terrain: y > 7 ? 'water' : 'ground',
         availableForDeploy: null
       }))
     )
@@ -29,7 +29,7 @@ const state: SerializedGameState = {
               y,
               z: 1
             },
-            terrain: x === 0 && y === 0 ? 'water' : 'ground',
+            terrain: 'ground',
             availableForDeploy: null
           }))
         )
