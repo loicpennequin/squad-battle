@@ -94,7 +94,11 @@ const dispatch = (
 <template>
   <div class="overflow-hidden" style="background: black">
     <ClientOnly>
-      <Game :game-session="session" @move="dispatch('move', $event)" />
+      <Game
+        :game-session="session"
+        @move="dispatch('move', $event)"
+        @attack="dispatch('attack', $event)"
+      />
       <template #fallback>
         <div class="overflow-hidden h-screen" style="background: black"></div>
       </template>

@@ -1,14 +1,15 @@
 <script setup lang="ts">
-import { PTransition, EasePresets } from 'vue3-pixi';
+import { PTransition } from 'vue3-pixi';
 import { OutlineFilter } from '@pixi/filter-outline';
 import { AdvancedBloomFilter } from '@pixi/filter-advanced-bloom';
 import type { Entity } from '@game/sdk';
 import type { Container, Filter } from 'pixi.js';
 import { Hitbox } from '~/utils/hitbox';
+import { match } from 'ts-pattern';
 
 const { entity } = defineProps<{ entity: Entity }>();
 
-const { camera, assets, state, ui, fx } = useGame();
+const { camera, assets, state, ui, fx, dispatch } = useGame();
 
 const textures = computed(() => {
   const sheet = assets.getSpritesheet(entity.blueprint.spriteId);
@@ -29,25 +30,24 @@ const hoveredFilters = [
 ];
 
 const isHovered = computed(() => ui.hoveredEntity.value?.equals(entity));
-const isSelected = computed(() => ui.selectedEntity.value?.equals(entity));
 const isActive = computed(() => state.value.activeEntity.equals(entity));
 
 watchEffect(() => {
   gsap.to(hoveredFilters[0], {
     duration: 0.2,
-    blur: isHovered.value || isSelected.value ? 4 : 0,
+    blur: isHovered.value ? 4 : 0,
     ease: Power2.easeOut
   });
   gsap.to(hoveredFilters[1], {
     duration: 0.2,
-    alpha: isHovered.value || isSelected.value ? 1 : 0,
+    alpha: isHovered.value ? 1 : 0,
     ease: Power2.easeOut
   });
 });
 
 const filters = computed(() => {
   const result: Filter[] = [];
-  if (isHovered.value || isSelected.value) {
+  if (isHovered.value) {
     result.push(...hoveredFilters);
   }
 
@@ -102,7 +102,9 @@ const onEnter = (container: Container) => {
         :enter="{ alpha: 1 }"
         :duration="{ leave: 0, enter: 500 }"
       >
-        <EntityStats v-if="isEnterAnimationDone" :entity="entity" />
+        <container>
+          <EntityStats v-if="isEnterAnimationDone" :entity="entity" />
+        </container>
       </PTransition>
 
       <PTransition appear :duration="{ enter: 1000, leave: 0 }" @enter="onEnter">
@@ -126,7 +128,32 @@ const onEnter = (container: Container) => {
                 ui.hoverAt(entity.position);
               }
             "
-            @pointerup="isSelected ? ui.unselect() : ui.select(entity.id)"
+            @pointerup="
+              () => {
+                match(ui.targetingMode.value)
+                  .with(TARGETING_MODES.NONE, () => {
+                    if (entity.equals(state.activeEntity)) {
+                      ui.switchTargetingMode(TARGETING_MODES.BASIC);
+                    }
+                  })
+                  .with(TARGETING_MODES.BASIC, () => {
+                    if (entity.equals(state.activeEntity)) {
+                      ui.switchTargetingMode(TARGETING_MODES.NONE);
+                      return;
+                    }
+
+                    if (
+                      entity.isEnemy(state.activeEntity.id) &&
+                      state.activeEntity.canAttack(entity) &&
+                      entity.canBeAttacked(state.activeEntity)
+                    ) {
+                      dispatch('attack', { targetId: entity.id });
+                    }
+                  })
+                  .with(TARGETING_MODES.SKILL, () => {})
+                  .exhaustive();
+              }
+            "
           />
         </container>
       </PTransition>

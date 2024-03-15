@@ -83,11 +83,11 @@ const filters = computed(() => {
                 if (pathfinding.canMoveTo(state.activeEntity, cell)) {
                   dispatch('move', cell.position);
                 } else {
-                  ui.unselect();
+                  ui.switchTargetingMode(TARGETING_MODES.NONE);
                 }
               })
               .otherwise(() => {
-                ui.unselect();
+                ui.switchTargetingMode(TARGETING_MODES.NONE);
               });
           }
         "

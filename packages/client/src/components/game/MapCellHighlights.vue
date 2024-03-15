@@ -12,9 +12,7 @@ const matchMovement = (cellToTest: Cell) => {
   return match(ui.targetingMode.value)
     .with(TARGETING_MODES.SKILL, () => false)
     .with(TARGETING_MODES.BASIC, () => {
-      if (!ui.selectedEntity.value) return false;
-      if (!ui.selectedEntity.value.isActive) return false;
-      return pathfinding.canMoveTo(ui.selectedEntity.value, cellToTest);
+      return pathfinding.canMoveTo(state.value.activeEntity, cellToTest);
     })
     .with(TARGETING_MODES.NONE, () => {
       if (!ui.hoveredEntity.value) return false;

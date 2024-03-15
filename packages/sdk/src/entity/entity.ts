@@ -17,6 +17,8 @@ export type SerializedEntity = {
   playerId: PlayerId;
   atbSeed: number;
   atb?: number;
+  ap?: number;
+  hp?: number;
 };
 
 export const ENTITY_EVENTS = {
@@ -81,6 +83,10 @@ export class Entity extends EventEmitter<EntityEventMap> implements Serializable
 
   atb: number;
 
+  private currentHp: ReactiveValue<number>;
+
+  private currentAp: ReactiveValue<number>;
+
   constructor(
     protected session: GameSession,
     options: SerializedEntity
@@ -91,6 +97,20 @@ export class Entity extends EventEmitter<EntityEventMap> implements Serializable
     this.blueprintId = options.blueprintId;
     this.playerId = options.playerId;
     this.atb = options.atb ?? this.atbSeed;
+    this.currentAp = new ReactiveValue(options.ap ?? this.maxAp, ap => {
+      if (ap <= 0) {
+        this.session.actionSystem.dispatch({
+          type: 'endTurn',
+          payload: { playerId: this.playerId }
+        });
+      }
+    });
+    this.currentHp = new ReactiveValue(options.hp ?? this.maxHp, hp => {
+      if (hp <= 0) {
+        this.destroy();
+      }
+    });
+
     this.emit('created', this);
   }
 
@@ -112,7 +132,9 @@ export class Entity extends EventEmitter<EntityEventMap> implements Serializable
       blueprintId: this.blueprint.id,
       playerId: this.playerId,
       atbSeed: this.atbSeed,
-      atb: this.atb
+      atb: this.atb,
+      ap: this.ap,
+      hp: this.hp
     };
   }
 
@@ -134,21 +156,6 @@ export class Entity extends EventEmitter<EntityEventMap> implements Serializable
     canBeAttackTarget: new Interceptable<boolean, { entity: Entity; source: Entity }>(),
     damageTaken: new Interceptable<number, { entity: Entity; amount: number }>()
   };
-
-  private currentHp = new ReactiveValue(0, hp => {
-    if (hp <= 0) {
-      this.destroy();
-    }
-  });
-
-  private currentAp = new ReactiveValue(0, ap => {
-    if (ap <= 0) {
-      this.session.actionSystem.dispatch({
-        type: 'endTurn',
-        payload: { playerId: this.playerId }
-      });
-    }
-  });
 
   get hp() {
     return this.currentHp.value;

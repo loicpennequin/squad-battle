@@ -20,7 +20,7 @@ export const CHARACTER_BLUEPRINTS: Record<CharacterBlueprintId, CharacterBluepri
       {
         id: 'test',
         spriteId: 'test',
-        maxHp: 10,
+        maxHp: 20,
         maxAp: 3,
 
         attack: 2,
@@ -31,7 +31,7 @@ export const CHARACTER_BLUEPRINTS: Record<CharacterBlueprintId, CharacterBluepri
       {
         id: 'test2',
         spriteId: 'test2',
-        maxHp: 10,
+        maxHp: 20,
         maxAp: 3,
 
         attack: 2,

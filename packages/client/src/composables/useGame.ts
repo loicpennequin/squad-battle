@@ -1,5 +1,5 @@
 import type { Values, UnionToIntersection, Point3D } from '@game/shared';
-import type { GameSession, GameState } from '@game/sdk';
+import type { EntityId, GameSession, GameState } from '@game/sdk';
 import type { AssetsContext } from './useAssets';
 import type { IsoCameraContext } from './useIsoCamera';
 import type { GameUiContext } from './useGameUi';
@@ -14,6 +14,7 @@ type ShortEmits<T extends Record<string, any>> = UnionToIntersection<
 
 export type GameEmits = {
   move: [Point3D];
+  attack: [{ targetId: EntityId }];
   // 'end-turn': [];
   // surrender: [];
   // 'use-skill': [{ entityId: number; skillId: SkillId; targets: Point3D[] }];
@@ -56,10 +57,6 @@ export const useGameProvider = (session: GameSession, emit: ShortEmits<GameEmits
   const state = ref(session.getState()) as Ref<GameState>;
   fx.provideState(state);
 
-  const dispatch: ShortEmits<GameEmits> = (type, payload) => {
-    emit(type, payload);
-  };
-
   watch(
     () => state.value.activeEntity.id,
     () => {
@@ -89,7 +86,7 @@ export const useGameProvider = (session: GameSession, emit: ShortEmits<GameEmits
     state,
     ui,
     pathfinding,
-    dispatch,
+    dispatch: emit,
     fx
   };
   provide(GAME_INJECTION_KEY, ctx);

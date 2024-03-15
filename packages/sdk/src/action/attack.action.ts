@@ -23,8 +23,7 @@ export class AttackAction extends GameAction<typeof schema> {
     const target = this.session.entitySystem.getEntityById(this.payload.targetId);
     if (!target) throw new Error(`Entity not found: ${this.payload.targetId}`);
 
-    const entity = this.session.atbSystem.activeEntity;
-    entity.dealDamage(entity.attack, target);
+    this.session.atbSystem.activeEntity.performAttack(target);
 
     return Promise.resolve();
   }

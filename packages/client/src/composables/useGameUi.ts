@@ -17,12 +17,9 @@ type LayerName = 'ui' | 'scene';
 export type GameUiContext = {
   hoveredCell: ComputedRef<Nullable<Cell>>;
   hoveredEntity: ComputedRef<Nullable<Entity>>;
-  selectedEntity: ComputedRef<Nullable<Entity>>;
   targetingMode: Ref<TargetingMode>;
   hoverAt(point: Point3D): void;
   unhover(): void;
-  select(id: EntityId): void;
-  unselect(): void;
   switchTargetingMode(mode: TargetingMode): void;
   registerLayer(layer: Layer, name: LayerName): void;
   assignLayer(obj: Nullable<DisplayObject>, layer: LayerName): void;
@@ -32,7 +29,6 @@ const GAME_UI_INJECTION_KEY = Symbol('iso-camera') as InjectionKey<GameUiContext
 
 export const useGameUiProvider = (session: GameSession) => {
   const hoveredPosition = ref<Nullable<Point3D>>(null);
-  const selectedEntityId = ref<Nullable<EntityId>>(null);
   const targetingMode = ref<TargetingMode>(TARGETING_MODES.NONE);
 
   const layers: Record<LayerName, Ref<Layer | undefined>> = {
@@ -40,7 +36,7 @@ export const useGameUiProvider = (session: GameSession) => {
     scene: ref()
   };
   session.on('entity:turn-ended', () => {
-    api.unselect();
+    api.switchTargetingMode(TARGETING_MODES.NONE);
   });
 
   const api: GameUiContext = {
@@ -68,31 +64,8 @@ export const useGameUiProvider = (session: GameSession) => {
     unhover() {
       hoveredPosition.value = null;
     },
-    selectedEntity: computed(() => {
-      if (!selectedEntityId.value) return;
-      return session.entitySystem.getEntityById(selectedEntityId.value);
-    }),
-    select(id) {
-      selectedEntityId.value = id;
-      targetingMode.value = TARGETING_MODES.BASIC;
-    },
-    unselect() {
-      selectedEntityId.value = null;
-      targetingMode.value = TARGETING_MODES.NONE;
-    },
     switchTargetingMode(mode) {
-      console.log(mode);
-      match(mode)
-        .with(TARGETING_MODES.BASIC, TARGETING_MODES.SKILL, () => {
-          if (!selectedEntityId.value) {
-            throw new Error('cannot switch targeting mode without a selectedEntity.');
-          }
-          targetingMode.value = mode;
-        })
-        .with(TARGETING_MODES.NONE, () => {
-          targetingMode.value = mode;
-        })
-        .exhaustive();
+      targetingMode.value = mode;
     },
     targetingMode
   };

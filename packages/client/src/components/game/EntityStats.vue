@@ -17,9 +17,12 @@ const textures = computed(() => {
     sheet
   );
 });
+const apTextures = computed(() => {
+  return createSpritesheetFrameObject('idle', assets.getSpritesheet('ap'));
+});
 
 const tweenedAtb = ref(entity.atb);
-const tweenedHp = ref(entity.atb);
+const tweenedHp = ref(entity.hp);
 
 watch(
   () => entity.atb,
@@ -42,15 +45,24 @@ watch(
     });
   }
 );
+
+const apXOffset = computed(() => {
+  const base = 7;
+  return base - (entity.ap - 3) * 8;
+});
 </script>
 
 <template>
   <container
     :ref="(container: any) => ui.assignLayer(container, 'ui')"
-    :y="-CELL_HEIGHT * 1.15"
+    :y="-CELL_HEIGHT * 1.3"
     :x="-CELL_WIDTH * 0.3"
     event-mode="none"
   >
+    <container>
+      <animated-sprite :textures="textures" playing loop />
+    </container>
+
     <pixi-graphics
       ref="mask"
       @render="
@@ -68,22 +80,31 @@ watch(
             ] as const
           ];
           g.clear();
-          g.beginFill('black');
-          g.drawRect(0, 0, sheet.data.meta.size!.w, sheet.data.meta.size!.h);
-          g.endFill();
-          g.beginHole();
+          g.beginFill(0x665555);
           slices.forEach(([slice, stat, max]) => {
             if (!slice) return;
             const { bounds } = slice.keys[0];
             const xOffset = clamp(Math.round(bounds.w * (stat / max)), 0, bounds.w);
             g.drawRect(bounds.x + xOffset, bounds.y, bounds.w - xOffset, bounds.h);
           });
-          g.endHole();
+
+          g.endFill();
         }
       "
     />
-    <container :mask="mask">
-      <animated-sprite :textures="textures" playing loop />
-    </container>
+  </container>
+
+  <container
+    :ref="(container: any) => ui.assignLayer(container, 'ui')"
+    :y="-CELL_HEIGHT * 0.95"
+    :x="apXOffset"
+    event-mode="none"
+  >
+    <animated-sprite
+      v-for="(_, i) in entity.ap"
+      :key="i"
+      :x="i * 8"
+      :textures="apTextures"
+    />
   </container>
 </template>
