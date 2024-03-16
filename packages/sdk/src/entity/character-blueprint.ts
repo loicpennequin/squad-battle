@@ -24,7 +24,7 @@ export const CHARACTER_BLUEPRINTS: Record<CharacterBlueprintId, CharacterBluepri
         maxAp: 3,
 
         attack: 2,
-        initiative: 8,
+        initiative: 7,
 
         skills: []
       },
@@ -36,6 +36,28 @@ export const CHARACTER_BLUEPRINTS: Record<CharacterBlueprintId, CharacterBluepri
 
         attack: 2,
         initiative: 6,
+
+        skills: []
+      },
+      {
+        id: 'test3',
+        spriteId: 'test3',
+        maxHp: 18,
+        maxAp: 3,
+
+        attack: 3,
+        initiative: 8,
+
+        skills: []
+      },
+      {
+        id: 'test4',
+        spriteId: 'test4',
+        maxHp: 22,
+        maxAp: 3,
+
+        attack: 2,
+        initiative: 5,
 
         skills: []
       }

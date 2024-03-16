@@ -22,6 +22,11 @@ const state: SerializedGameState = {
       id: 3,
       spriteId: 'tree',
       position: { x: 3, y: 3, z: 1 }
+    },
+    {
+      id: 3,
+      spriteId: 'column',
+      position: { x: 1, y: 2, z: 1 }
     }
   ],
   map: {
@@ -63,6 +68,10 @@ const state: SerializedGameState = {
         {
           characterId: 'test',
           position: { x: 3, y: 4, z: 1 }
+        },
+        {
+          characterId: 'test3',
+          position: { x: 4, y: 4, z: 1 }
         }
       ]
     },
@@ -74,6 +83,10 @@ const state: SerializedGameState = {
         {
           characterId: 'test2',
           position: { x: 5, y: 5, z: 0 }
+        },
+        {
+          characterId: 'test4',
+          position: { x: 6, y: 6, z: 0 }
         }
       ]
     }

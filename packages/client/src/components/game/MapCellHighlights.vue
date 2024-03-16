@@ -2,6 +2,7 @@
 import type { Cell } from '@game/sdk';
 import { match } from 'ts-pattern';
 import { PTransition } from 'vue3-pixi';
+import { BITMASK_TO_INDEX_DICT } from '~/utils/bit-masking';
 
 const { cell } = defineProps<{ cell: Cell }>();
 const { session, assets, camera, ui, state, pathfinding, fx } = useGame();

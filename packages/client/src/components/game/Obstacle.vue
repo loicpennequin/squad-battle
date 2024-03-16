@@ -1,13 +1,12 @@
 <script setup lang="ts">
 import { PTransition } from 'vue3-pixi';
 import type { Obstacle } from '@game/sdk';
-import { Container, type Filter } from 'pixi.js';
+import { Container } from 'pixi.js';
 import { Hitbox } from '~/utils/hitbox';
-import { match } from 'ts-pattern';
 
 const { obstacle } = defineProps<{ obstacle: Obstacle }>();
 
-const { camera, assets, state, ui, fx, dispatch } = useGame();
+const { camera, assets, state, fx } = useGame();
 
 const textures = computed(() => {
   const sheet = assets.getSpritesheet(obstacle.spriteId);

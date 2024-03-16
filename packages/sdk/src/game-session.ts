@@ -1,7 +1,7 @@
 import EventEmitter from 'eventemitter3';
 import { EntitySystem } from './entity/entity-system';
 import { GameMap, type GameMapOptions } from './map/map';
-import { ATBSystem } from './atb';
+import { ATBSystem } from './atb-system';
 import { PlayerSystem } from './player/player-system';
 import type {
   Entity,
@@ -28,6 +28,7 @@ export type GameState = {
   history: GameAction<any>[];
   phase: GamePhase;
   obstacles: Obstacle[];
+  timeline: Entity[];
 };
 
 export type SerializedGameState = {
@@ -38,6 +39,7 @@ export type SerializedGameState = {
   history: SerializedAction[];
   activeEntityId: Nullable<EntityId>;
   phase: GamePhase;
+  timeline: SerializedEntity[];
 };
 
 type EntityLifecycleEvent = 'created' | 'destroyed';
@@ -150,6 +152,7 @@ export class GameSession extends EventEmitter<GlobalGameEvents> {
       activeEntity: this.atbSystem.activeEntity,
       history: this.actionSystem.getHistory(),
       phase: this.phase,
+      timeline: this.atbSystem.getTimeline(this.entitySystem.getList(), 10),
       winner: undefined
     };
   }
