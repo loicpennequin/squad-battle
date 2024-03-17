@@ -1,6 +1,8 @@
 import { Vec3, type Nullable, type Serializable } from '@game/shared';
 import type { Point3D } from '../types';
 import { pointToCellId } from '../utils/helpers';
+import type { GameSession } from '../game-session';
+import type { Direction } from './map-utils';
 // import { Tile } from './tile';
 
 export type CellId = `${string}:${string}:${string}`;
@@ -16,7 +18,10 @@ export class Cell implements Serializable {
   public readonly terrain: string;
   public readonly availableForDeploy: Nullable<number>;
 
-  constructor(options: SerializedCell) {
+  constructor(
+    private session: GameSession,
+    options: SerializedCell
+  ) {
     this.position = Vec3.fromPoint3D(options.position);
     this.terrain = options.terrain;
     this.availableForDeploy = options.availableForDeploy;
@@ -27,9 +32,13 @@ export class Cell implements Serializable {
   }
 
   clone() {
-    const clone = new Cell(this.serialize());
+    const clone = new Cell(this.session, this.serialize());
 
     return clone;
+  }
+
+  getDestination(direction: Direction) {
+    return this.session.map.getDestination(this, direction);
   }
 
   get id(): CellId {

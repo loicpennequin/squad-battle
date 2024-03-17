@@ -9,7 +9,7 @@
 <style scoped lang="postcss">
 .timeline-wrapper {
   position: absolute;
-  top: 0;
+  top: var(--size-2);
   left: 50%;
   transform: translateX(-50%);
 }

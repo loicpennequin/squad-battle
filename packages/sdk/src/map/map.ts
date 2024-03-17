@@ -4,7 +4,7 @@ import { Cell, type CellId, type SerializedCell } from './cell';
 import { cellIdToPoint } from '../utils/helpers';
 import type { GameSession } from '../game-session';
 import { DIRECTIONS_TO_DIFF, type Direction } from './map-utils';
-import { Pathfinder, type DistanceMap } from './pathfinding';
+import { Pathfinder } from './pathfinding';
 import type { Entity } from '../entity/entity';
 
 export type GameMapOptions = {
@@ -35,7 +35,7 @@ export class GameMap {
 
   private makeCells(cells: GameMapOptions['cells']) {
     return cells.map(cell => {
-      return new Cell(cell);
+      return new Cell(this.session, cell);
     });
   }
 
@@ -56,7 +56,7 @@ export class GameMap {
   }
 
   // given a position, determine where a unit would land if it were to move from than position
-  getDestination(posOrKey: Point3D | CellId, direction: Direction): Point3D | null {
+  getDestination(posOrKey: Point3D | CellId, direction: Direction): Cell | null {
     const from = isString(posOrKey)
       ? Vec3.fromPoint3D(cellIdToPoint(posOrKey))
       : Vec3.fromPoint3D(posOrKey);
@@ -74,15 +74,15 @@ export class GameMap {
 
     if (!currentCell.isWalkable) return null;
     if (cellAbove?.isWalkable) {
-      return targetAbove;
+      return cellAbove;
     }
 
     if (cell?.isWalkable) {
-      return target;
+      return cell;
     }
 
     if (cellBelow?.isWalkable) {
-      return targetBelow;
+      return cellBelow;
     }
 
     return null;
@@ -131,5 +131,26 @@ export class GameMap {
       this.getCellAt({ x: point.x + 1, y: point.y, z: point.z }),
       this.getCellAt({ x: point.x + 1, y: point.y + 1, z: point.z })
     ].filter(isDefined);
+  }
+
+  getNeighborsDestinations(point: Point3D) {
+    return [
+      ...new Set(
+        [
+          this.getDestination(point, 'north'),
+          this.getDestination(point, 'north')?.getDestination('east'),
+          this.getDestination(point, 'north')?.getDestination('west'),
+          this.getDestination(point, 'south'),
+          this.getDestination(point, 'south')?.getDestination('east'),
+          this.getDestination(point, 'south')?.getDestination('west'),
+          this.getDestination(point, 'east'),
+          this.getDestination(point, 'east')?.getDestination('north'),
+          this.getDestination(point, 'east')?.getDestination('south'),
+          this.getDestination(point, 'west'),
+          this.getDestination(point, 'west')?.getDestination('north'),
+          this.getDestination(point, 'west')?.getDestination('south')
+        ].filter(isDefined)
+      )
+    ];
   }
 }

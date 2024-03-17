@@ -54,9 +54,16 @@ export const usePathfindingProvider = (session: GameSession) => {
         maxApCache.set(entity.id, dm);
       }
       const distanceMap = maxApCache.get(entity.id)!;
-
+      const neighbors = session.map.getNeighborsDestinations(point);
+      const canAttack = neighbors.some(
+        neighbor =>
+          entity.canMove(distanceMap.get(neighbor), 0) &&
+          entity.canAttackAt(point, neighbor)
+      );
       return (
-        entity.canMove(distanceMap.get(point), entity.maxAp) || entity.canAttackAt(point)
+        entity.canMove(distanceMap.get(point), 0) ||
+        entity.canAttackAt(point) ||
+        canAttack
       );
     }
   };
