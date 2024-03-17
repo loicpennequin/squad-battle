@@ -19,6 +19,8 @@ export type SerializedEntity = {
   atb?: number;
   ap?: number;
   hp?: number;
+  movementSpent?: number;
+  actionsTaken?: number;
 };
 
 export const ENTITY_EVENTS = {
@@ -83,9 +85,28 @@ export class Entity extends EventEmitter<EntityEventMap> implements Serializable
 
   atb: number;
 
-  private currentHp: ReactiveValue<number>;
+  private movementSpent: number;
+  private actionsTaken: number;
 
-  private currentAp: ReactiveValue<number>;
+  currentAp: number;
+
+  private currentHp = new ReactiveValue(0, hp => {
+    if (hp <= 0) {
+      this.destroy();
+    }
+  });
+
+  private interceptors = {
+    attack: new Interceptable<number, Entity>(),
+    speed: new Interceptable<number, Entity>(),
+    initiative: new Interceptable<number, Entity>(),
+    maxHp: new Interceptable<number, Entity>(),
+    maxAp: new Interceptable<number, Entity>(),
+    canMove: new Interceptable<boolean, Entity>(),
+    canAttack: new Interceptable<boolean, { entity: Entity; target: Entity }>(),
+    canBeAttackTarget: new Interceptable<boolean, { entity: Entity; source: Entity }>(),
+    damageTaken: new Interceptable<number, { entity: Entity; amount: number }>()
+  };
 
   constructor(
     protected session: GameSession,
@@ -97,19 +118,10 @@ export class Entity extends EventEmitter<EntityEventMap> implements Serializable
     this.blueprintId = options.blueprintId;
     this.playerId = options.playerId;
     this.atb = options.atb ?? this.atbSeed;
-    this.currentAp = new ReactiveValue(options.ap ?? this.maxAp, ap => {
-      if (ap <= 0) {
-        this.session.actionSystem.dispatch({
-          type: 'endTurn',
-          payload: { playerId: this.playerId }
-        });
-      }
-    });
-    this.currentHp = new ReactiveValue(options.hp ?? this.maxHp, hp => {
-      if (hp <= 0) {
-        this.destroy();
-      }
-    });
+    this.movementSpent = options?.movementSpent ?? 0;
+    this.actionsTaken = options?.actionsTaken ?? 0;
+    this.currentAp = options.ap ?? this.maxAp;
+    this.currentHp.lazySetInitialValue(options.hp ?? this.maxHp);
 
     this.emit('created', this);
   }
@@ -134,7 +146,8 @@ export class Entity extends EventEmitter<EntityEventMap> implements Serializable
       atbSeed: this.atbSeed,
       atb: this.atb,
       ap: this.ap,
-      hp: this.hp
+      hp: this.hp,
+      movementSpent: this.movementSpent
     };
   }
 
@@ -146,17 +159,6 @@ export class Entity extends EventEmitter<EntityEventMap> implements Serializable
     return this.session.playerSystem.getPlayerById(this.playerId)!;
   }
 
-  private interceptors = {
-    attack: new Interceptable<number, Entity>(),
-    initiative: new Interceptable<number, Entity>(),
-    maxHp: new Interceptable<number, Entity>(),
-    maxAp: new Interceptable<number, Entity>(),
-    canMove: new Interceptable<boolean, Entity>(),
-    canAttack: new Interceptable<boolean, { entity: Entity; target: Entity }>(),
-    canBeAttackTarget: new Interceptable<boolean, { entity: Entity; source: Entity }>(),
-    damageTaken: new Interceptable<number, { entity: Entity; amount: number }>()
-  };
-
   get hp() {
     return this.currentHp.value;
   }
@@ -166,11 +168,11 @@ export class Entity extends EventEmitter<EntityEventMap> implements Serializable
   }
 
   get ap() {
-    return this.currentAp.value;
+    return this.currentAp;
   }
 
-  private set ap(val: number) {
-    this.currentAp.value = clamp(val, 0, this.maxAp);
+  set ap(val) {
+    this.currentAp = clamp(val, 0, this.maxAp);
   }
 
   get maxHp(): number {
@@ -185,6 +187,10 @@ export class Entity extends EventEmitter<EntityEventMap> implements Serializable
     return this.interceptors.attack.getValue(this.blueprint.attack, this);
   }
 
+  get speed(): number {
+    return this.interceptors.attack.getValue(this.blueprint.speed, this);
+  }
+
   get initiative(): number {
     return this.interceptors.initiative.getValue(this.blueprint.initiative, this);
   }
@@ -197,8 +203,16 @@ export class Entity extends EventEmitter<EntityEventMap> implements Serializable
     return this.equals(activeEntity);
   }
 
-  canMove(distance: number, simulatedAp?: number) {
-    return this.interceptors.canMove.getValue(distance <= (simulatedAp ?? this.ap), this);
+  getRremainingMovement(movementSpent: number) {
+    return this.speed - movementSpent;
+  }
+
+  canMove(distance: number, simulatedMovementSpent?: number) {
+    return this.interceptors.canMove.getValue(
+      distance <=
+        this.getRremainingMovement(simulatedMovementSpent ?? this.movementSpent),
+      this
+    );
   }
 
   canBeAttacked(source: Entity) {
@@ -210,11 +224,11 @@ export class Entity extends EventEmitter<EntityEventMap> implements Serializable
   }
 
   canAttack(target: Entity) {
+    if (this.actionsTaken >= 1) return false;
     if (!this.canAttackAt(target.position)) return false;
 
     const baseValue =
       this.canAttackAt(target.position) &&
-      this.ap > 0 &&
       isEnemy(this.session, target.id, this.playerId);
 
     return (
@@ -240,26 +254,31 @@ export class Entity extends EventEmitter<EntityEventMap> implements Serializable
     this.interceptors[key].remove(interceptor);
   }
 
-  move(path: Point3D[]) {
-    for (const point of path) {
-      if (this.ap === 0) break;
-      this.emit(ENTITY_EVENTS.BEFORE_MOVE, this);
-      this.position = Vec3.fromPoint3D(point);
-      this.ap--;
-      this.emit(ENTITY_EVENTS.AFTER_MOVE, this);
-    }
-  }
-
   startTurn() {
-    this.ap = this.maxAp;
+    this.ap++;
+    this.movementSpent = 0;
+    this.actionsTaken = 0;
 
     this.emit(ENTITY_EVENTS.TURN_STARTED, this);
   }
 
   endTurn() {
-    this.atb = (this.ap / this.maxAp) * 100 + this.atbSeed;
-
     this.emit(ENTITY_EVENTS.TURN_ENDED, this);
+  }
+
+  destroy() {
+    this.session.entitySystem.removeEntity(this);
+    this.emit('destroyed', this);
+  }
+
+  move(path: Point3D[]) {
+    for (const point of path) {
+      if (this.movementSpent === this.speed) break;
+      this.emit(ENTITY_EVENTS.BEFORE_MOVE, this);
+      this.position = Vec3.fromPoint3D(point);
+      this.movementSpent++;
+      this.emit(ENTITY_EVENTS.AFTER_MOVE, this);
+    }
   }
 
   getTakenDamage(amount: number) {
@@ -282,11 +301,6 @@ export class Entity extends EventEmitter<EntityEventMap> implements Serializable
     this.emit(ENTITY_EVENTS.AFTER_DEAL_DAMAGE, payload);
   }
 
-  destroy() {
-    this.session.entitySystem.removeEntity(this);
-    this.emit('destroyed', this);
-  }
-
   async takeDamage(power: number, source: Nullable<Entity>) {
     const amount = this.getTakenDamage(power);
     const payload = {
@@ -302,7 +316,7 @@ export class Entity extends EventEmitter<EntityEventMap> implements Serializable
         count: 6,
         totalDuration: 0.4,
         axis: 'x',
-        amount: 3
+        amount: 2
       }),
       this.session.fxSystem.displayDamageIndicator(
         this.session.atbSystem.activeEntity.id,
@@ -316,7 +330,7 @@ export class Entity extends EventEmitter<EntityEventMap> implements Serializable
   async performAttack(target: Entity) {
     await this.session.fxSystem.attack(this.id, target.id);
     this.dealDamage(this.attack, target);
-    this.ap--;
+    this.actionsTaken++;
   }
 
   isAlly(entityId: EntityId) {

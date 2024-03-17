@@ -26,6 +26,4 @@ const { state, ui } = useGame();
   <Tint />
   <Layer :ref="(layer: any) => ui.registerLayer(layer, 'ui')" />
   <Fps />
-
-  <Timeline />
 </template>

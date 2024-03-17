@@ -87,5 +87,26 @@ onMounted(async () => {
 <template>
   <div class="pixi-app-container">
     <canvas ref="canvas" @contextmenu.prevent />
+    <DeployUi v-if="game.state.value.phase == 'deploy'" />
+    <BattleUi v-else-if="game.state.value.phase == 'battle'" />
   </div>
 </template>
+
+<style scoped lang="postcss">
+.pixi-app-container {
+  cursor: v-bind('cursors.default');
+  user-select: none;
+
+  position: relative;
+  transform-style: preserve-3d;
+
+  overflow: hidden;
+
+  font-family: monospace;
+  color: var(--gray-0);
+
+  perspective: 1200px;
+
+  image-rendering: pixelated;
+}
+</style>

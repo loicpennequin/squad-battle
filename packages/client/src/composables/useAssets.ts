@@ -5,6 +5,7 @@ export type SpritesheetWithAnimations = Spritesheet & {
   animations: Record<string, Texture[]>;
 };
 export type AssetsContext = {
+  loaded: Ref<boolean>;
   getSpritesheet(key: string, falback?: string): SpritesheetWithAnimations;
   getTexture(key: string): Texture;
   getHitbox(key: string): any;
@@ -14,12 +15,14 @@ export type AssetsContext = {
 export const ASSETS_INJECTION_KEY = Symbol('assets') as InjectionKey<AssetsContext>;
 
 export const useAssetsProvider = () => {
+  const loaded = ref(false);
   const load = async () => {
     extensions.add(asepriteSpriteSheetParser, asepriteTilesetParser);
 
     Assets.cache.reset();
     const manifest = await $fetch<AssetsManifest>('/assets/assets-manifest.json');
     Assets.init({ manifest });
+
     await Promise.all([
       Assets.loadBundle('tiles'),
       Assets.loadBundle('ui'),
@@ -29,9 +32,12 @@ export const useAssetsProvider = () => {
       Assets.loadBundle('fx'),
       Assets.loadBundle('hitboxes')
     ]);
+    console.log('loaded');
+    loaded.value = true;
   };
 
   const api: AssetsContext = {
+    loaded,
     load,
     getSpritesheet(key: string) {
       return Assets.get<SpritesheetWithAnimations>(key);

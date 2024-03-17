@@ -16,6 +16,10 @@ export class ReactiveValue<T> {
     private onChange: (val: T) => void
   ) {}
 
+  lazySetInitialValue(val: T) {
+    this.internalValue = val;
+  }
+
   get value() {
     return this.internalValue;
   }
@@ -31,9 +35,8 @@ export type Interceptor<
   TContext extends AnyObject
 > = (value: Readonly<TValue>, ctx: Readonly<TContext>) => TValue;
 
-export type inferInterceptor<T> = T extends Interceptable<infer Value, infer Ctx>
-  ? Interceptor<Value, Ctx>
-  : never;
+export type inferInterceptor<T> =
+  T extends Interceptable<infer Value, infer Ctx> ? Interceptor<Value, Ctx> : never;
 
 export class Interceptable<
   TValue extends string | number | boolean,

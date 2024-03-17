@@ -7,6 +7,7 @@ const state: SerializedGameState = {
   activeEntityId: null,
   history: [],
   phase: 'deploy',
+  timeline: [],
   obstacles: [
     {
       id: 1,
@@ -27,6 +28,11 @@ const state: SerializedGameState = {
       id: 3,
       spriteId: 'column',
       position: { x: 1, y: 2, z: 1 }
+    },
+    {
+      id: 4,
+      spriteId: 'column',
+      position: { x: 2, y: 2, z: 1 }
     }
   ],
   map: {
@@ -118,5 +124,6 @@ const dispatch = (
     :game-session="session"
     @move="dispatch('move', $event)"
     @attack="dispatch('attack', $event)"
+    @end-turn="dispatch('endTurn', $event)"
   />
 </template>
