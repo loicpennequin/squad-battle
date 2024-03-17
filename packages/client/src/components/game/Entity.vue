@@ -117,7 +117,20 @@ const onPointerup = () => {
         dispatch('attack', { targetId: entity.id });
       }
     })
-    .with(TARGETING_MODES.SKILL, () => ({}))
+    .with(TARGETING_MODES.SKILL, () => {
+      if (
+        ui.selectedSkill.value &&
+        state.value.activeEntity.canUseSkillAt(
+          ui.selectedSkill.value,
+          entity.position,
+          ui.skillTargets.value
+        )
+      ) {
+        ui.skillTargets.value.push(entity.position);
+      } else {
+        ui.switchTargetingMode(TARGETING_MODES.NONE);
+      }
+    })
     .exhaustive();
 };
 </script>

@@ -4,6 +4,8 @@
   <Timeline />
 
   <TeamInfos />
+
+  <ActionBar />
 </template>
 
 <style scoped lang="postcss">

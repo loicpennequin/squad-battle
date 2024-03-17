@@ -86,6 +86,20 @@ const filters = computed(() => {
                   ui.switchTargetingMode(TARGETING_MODES.NONE);
                 }
               })
+              .with(TARGETING_MODES.SKILL, () => {
+                if (
+                  ui.selectedSkill.value &&
+                  state.activeEntity.canUseSkillAt(
+                    ui.selectedSkill.value,
+                    cell,
+                    ui.skillTargets.value
+                  )
+                ) {
+                  ui.skillTargets.value.push(cell.position);
+                } else {
+                  ui.switchTargetingMode(TARGETING_MODES.NONE);
+                }
+              })
               .otherwise(() => {
                 ui.switchTargetingMode(TARGETING_MODES.NONE);
               });

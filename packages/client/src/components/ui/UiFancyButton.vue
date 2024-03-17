@@ -83,7 +83,7 @@ const tag = computed(() => {
     background-repeat: no-repeat;
     background-position: center var(--_gradoffset);
     background-size: 100% 200%;
-    border: var(--fancy-border);
+    border: solid 3px black;
     border-radius: var(--radius-pill);
 
     transition: all 0.3s ease;
@@ -145,7 +145,6 @@ const tag = computed(() => {
       outline: none;
       box-shadow:
         0 -0.2em 1em hsla(var(--hue2), 70%, 80%, 0.3),
-        0 0.5em 1.5em hsla(var(--hue), 70%, 80%, 0.5),
         0 0.25em 0.3em -0.2em hsl(var(--hue) 90% 70%),
         0 0.25em 0.5em hsla(var(--hue), 20%, 30%, 0.2),
         inset 0 -2px 2px rgba(255, 255, 255, 0.2);

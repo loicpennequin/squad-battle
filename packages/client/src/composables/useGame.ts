@@ -1,5 +1,5 @@
 import type { Values, UnionToIntersection, Point3D } from '@game/shared';
-import type { EntityId, GameSession, GameState } from '@game/sdk';
+import type { EntityId, GameSession, GameState, SkillId } from '@game/sdk';
 import type { AssetsContext } from './useAssets';
 import type { IsoCameraContext } from './useIsoCamera';
 import type { GameUiContext } from './useGameUi';
@@ -16,8 +16,8 @@ export type GameEmits = {
   move: [Point3D];
   attack: [{ targetId: EntityId }];
   endTurn: [];
+  useSkill: [{ skillId: SkillId; targets: Point3D[] }];
   // surrender: [];
-  // 'use-skill': [{ entityId: number; skillId: SkillId; targets: Point3D[] }];
   // summon: [{ unitId: UnitId; position: Point3D; targets: Point3D[] }];
   // end: [{ winner: Player }];
 };
@@ -66,7 +66,7 @@ export const useGameProvider = (session: GameSession, emit: ShortEmits<GameEmits
     }
   );
 
-  session.on('game:action', () => {
+  session.on('game:action', action => {
     state.value = session.getState();
     // if (action.name === 'END_TURN') {
     //   context.ui.selectedEntity.value = null;

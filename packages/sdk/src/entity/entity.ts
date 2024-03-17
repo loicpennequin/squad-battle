@@ -7,6 +7,7 @@ import { CHARACTER_BLUEPRINTS } from './character-blueprint';
 import { Interceptable, ReactiveValue, type inferInterceptor } from '../utils/helpers';
 import { isAlly, isEnemy } from './entity-utils';
 import { isWithinCells } from '../utils/targeting';
+import type { Skill, SkillId } from '../skill/skill';
 
 export type EntityId = number;
 
@@ -35,6 +36,9 @@ export const ENTITY_EVENTS = {
 
   BEFORE_TAKE_DAMAGE: 'before_take_damage',
   AFTER_TAKE_DAMAGE: 'after_take_damage',
+
+  BEFORE_USE_SKILL: 'before_use_skill',
+  AFTER_USE_SKILL: 'after_use_skill',
 
   TURN_STARTED: 'turn-started',
   TURN_ENDED: 'turn-ended'
@@ -104,6 +108,7 @@ export class Entity extends EventEmitter<EntityEventMap> implements Serializable
     maxAp: new Interceptable<number, Entity>(),
     canMove: new Interceptable<boolean, Entity>(),
     canAttack: new Interceptable<boolean, { entity: Entity; target: Entity }>(),
+    canUseSkill: new Interceptable<boolean, { entity: Entity; target: Entity }>(),
     canBeAttackTarget: new Interceptable<boolean, { entity: Entity; source: Entity }>(),
     damageTaken: new Interceptable<number, { entity: Entity; amount: number }>()
   };
@@ -203,6 +208,10 @@ export class Entity extends EventEmitter<EntityEventMap> implements Serializable
     return this.equals(activeEntity);
   }
 
+  get skills() {
+    return this.blueprint.skills;
+  }
+
   getRremainingMovement(movementSpent: number) {
     return this.speed - movementSpent;
   }
@@ -217,6 +226,34 @@ export class Entity extends EventEmitter<EntityEventMap> implements Serializable
 
   canBeAttacked(source: Entity) {
     return this.interceptors.canBeAttackTarget.getValue(true, { entity: this, source });
+  }
+
+  hasSkill(skillId: SkillId) {
+    return this.skills.some(s => s.id === skillId);
+  }
+
+  getSkill(skillId: SkillId) {
+    return this.skills.find(s => s.id === skillId);
+  }
+
+  canUseSkillAt(skill: Skill, point: Point3D, otherTargets: Point3D[]) {
+    if (!this.hasSkill(skill.id)) return false;
+
+    if (otherTargets.length === skill.maxTargets) return false;
+
+    return skill.isTargetable(this.session, point, this, otherTargets);
+  }
+
+  canUseSkill(skill: Skill, targets: Point3D[]) {
+    if (this.actionsTaken >= 1) return false;
+    if (!this.hasSkill(skill.id)) return false;
+    if (targets.length < skill.minTargets) return false;
+    if (targets.length > skill.maxTargets) return false;
+    if (this.ap < skill.apCost) return false;
+
+    return targets.every(target =>
+      skill.isTargetable(this.session, target, this, targets)
+    );
   }
 
   canAttackAt(point: Point3D, simulatedPosition?: Point3D) {
@@ -263,6 +300,7 @@ export class Entity extends EventEmitter<EntityEventMap> implements Serializable
   }
 
   endTurn() {
+    this.atb = this.atbSeed;
     this.emit(ENTITY_EVENTS.TURN_ENDED, this);
   }
 
@@ -331,6 +369,19 @@ export class Entity extends EventEmitter<EntityEventMap> implements Serializable
     await this.session.fxSystem.attack(this.id, target.id);
     this.dealDamage(this.attack, target);
     this.actionsTaken++;
+  }
+
+  async useSkill(skill: Skill, targets: Point3D[]) {
+    this.ap -= skill.apCost;
+    this.actionsTaken++;
+    await skill.execute(
+      this.session,
+      this,
+      targets,
+      this.session.map.cells.filter(cell =>
+        skill.isInAreaOfEffect(this.session, cell, this, targets)
+      )
+    );
   }
 
   isAlly(entityId: EntityId) {

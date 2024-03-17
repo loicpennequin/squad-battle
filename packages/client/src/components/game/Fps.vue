@@ -22,20 +22,11 @@ const style = new TextStyle({ fill: 'white', fontSize: 12, fontFamily: 'monospac
 <template>
   <pixi-text :x="30" :y="15" :style="style">{{ averageFPS.toFixed() }} FPS</pixi-text>
   <pixi-text :x="30" :y="30" :style="style">
-    targeting mode: {{ ui.targetingMode }}
-  </pixi-text>
-  <pixi-text :x="30" :y="45" :style="style">
-    hovered cell: {{ ui.hoveredCell.value?.id }}
-  </pixi-text>
-  <pixi-text :x="30" :y="60" :style="style">
-    hovered entity: {{ ui.hoveredEntity.value?.id }}
-  </pixi-text>
-  <pixi-text :x="30" :y="75" :style="style">
-    FX playing: {{ fx.isPlaying.value }}
+    Targeting mode: {{ ui.targetingMode }}
   </pixi-text>
   <pixi-text
     :x="30"
-    :y="90"
+    :y="45"
     :style="style"
     @click="
       () => {
@@ -47,7 +38,7 @@ const style = new TextStyle({ fill: 'white', fontSize: 12, fontFamily: 'monospac
   </pixi-text>
   <pixi-text
     :x="30"
-    :y="105"
+    :y="60"
     :style="style"
     @click="
       () => {

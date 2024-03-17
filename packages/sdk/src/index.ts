@@ -7,3 +7,4 @@ export { Obstacle, type ObstacleId } from './obstacle/obstacle';
 export { GameMap } from './map/map';
 export { config } from './config';
 export { KEYWORDS, type Keyword } from './utils/keywords';
+export { type Skill, type SkillId } from './skill/skill';
