@@ -65,6 +65,12 @@ export class Player implements Serializable {
     return this.teamIds.map(id => CHARACTER_BLUEPRINTS[id]);
   }
 
+  get entities() {
+    return this.session.entitySystem
+      .getList()
+      .filter(entity => entity.player.equals(this));
+  }
+
   deployTeam() {
     if (!this.deployment) {
       throw new Error('Cannot deploy player with no deployment.');

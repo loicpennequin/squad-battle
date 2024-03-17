@@ -64,8 +64,8 @@ const rotatedCartesian = computed(() => {
   const rotatedCell = rotatedFloor.find(cell => cell.track === track)!;
 
   return {
-    x: rotatedCell.floorX,
-    y: rotatedCell.floorY,
+    x: rotatedCell?.floorX ?? 0,
+    y: rotatedCell?.floorY ?? 0,
     z
   };
 });

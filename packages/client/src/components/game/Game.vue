@@ -102,6 +102,8 @@ onMounted(async () => {
 
   overflow: hidden;
 
+  height: 100vh;
+
   font-family: monospace;
   color: var(--gray-0);
 

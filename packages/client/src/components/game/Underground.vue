@@ -1,7 +1,7 @@
 <script setup lang="ts">
 const { state, camera, fx, assets } = useGame();
 
-const DEPTH = 4;
+const DEPTH = 1;
 const UNDERGROUND_SPRITE_SIZE = 4;
 
 const edgeCells = computed(() =>
@@ -19,6 +19,21 @@ const textures = computed(() => {
   const sheet = assets.getSpritesheet('underground');
   return sheet.animations[0];
 });
+
+// const floor = Array.from({ length: state.value.map.height + 6 }, (_, y) =>
+//   Array.from({ length: state.value.map.width + 6 }, (_, x) => ({
+//     x: x,
+//     y: y,
+//     z: -1
+//   }))
+// )
+//   .flat()
+//   .filter(cell => cell.x > state.value.map.width || cell.y > state.value.map.height);
+
+// const floorTexture = computed(() => {
+//   const sheet = assets.getSpritesheet('water');
+//   return sheet.animations[0];
+// });
 </script>
 
 <template>
@@ -36,4 +51,16 @@ const textures = computed(() => {
       <animated-sprite :textures="textures" :anchor="0.5" event-mode="none" />
     </IsoPositioner>
   </template>
+  <!-- <IsoPositioner
+    v-for="(cell, index) in floor"
+    :key="index"
+    :animated="!fx.isPlaying.value"
+    v-bind="cell"
+    :angle="0"
+    :height="state.map.height + 5"
+    :width="state.map.width + 5"
+    :z-index-offset="100"
+  >
+    <animated-sprite :textures="floorTexture" :anchor="0.5" event-mode="none" />
+  </IsoPositioner> -->
 </template>

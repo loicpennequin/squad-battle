@@ -9,6 +9,7 @@ export type CharacterBlueprint = {
   maxAp: number;
 
   attack: number;
+  spellPower: number;
   speed: number;
   initiative: number;
 
@@ -25,6 +26,7 @@ export const CHARACTER_BLUEPRINTS: Record<CharacterBlueprintId, CharacterBluepri
         maxAp: 3,
 
         attack: 2,
+        spellPower: 1,
         speed: 3,
         initiative: 7,
 
@@ -37,6 +39,7 @@ export const CHARACTER_BLUEPRINTS: Record<CharacterBlueprintId, CharacterBluepri
         maxAp: 3,
 
         attack: 2,
+        spellPower: 1,
         speed: 3,
         initiative: 6,
 
@@ -49,6 +52,7 @@ export const CHARACTER_BLUEPRINTS: Record<CharacterBlueprintId, CharacterBluepri
         maxAp: 3,
 
         attack: 3,
+        spellPower: 1,
         speed: 3,
         initiative: 8,
 
@@ -61,6 +65,7 @@ export const CHARACTER_BLUEPRINTS: Record<CharacterBlueprintId, CharacterBluepri
         maxAp: 3,
 
         attack: 2,
+        spellPower: 1,
         speed: 3,
         initiative: 5,
 

@@ -1,9 +1,9 @@
 <script setup lang="ts"></script>
 
 <template>
-  <div class="timeline-wrapper">
-    <Timeline />
-  </div>
+  <Timeline />
+
+  <TeamInfos />
 </template>
 
 <style scoped lang="postcss">

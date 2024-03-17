@@ -1,58 +1,26 @@
 <script setup lang="ts">
-const { assets, state } = useGame();
-
-const items = computed(() => {
-  if (!assets.loaded.value) return [];
-
-  return state.value.timeline.map((entity, index) => {
-    const sheet = assets.getSpritesheet(entity.blueprint.spriteId);
-
-    const slice = sheet?.data.meta.slices?.find(slice => slice.name === 'icon');
-
-    return {
-      id: `${entity.id}:${index}`,
-      style: {
-        '--bg': `url(/assets/units/${entity.blueprint.spriteId}.png)`,
-        '--bg-position': `-${slice?.keys[0].bounds.x}px -${slice?.keys[0].bounds.y}px`
-      }
-    };
-  });
-});
-// const bgTexture = assets.getTexture('timeline-item.png');
-// const maskTexture = assets.getTexture('timeline-mask.png');
+const { state } = useGame();
 
 const totalWidth = computed(() => state.value.timeline.length * 64);
 </script>
 
 <template>
-  <div v-if="assets.loaded" class="timeline flex">
-    <div v-for="item in items" :key="item.id" :style="item.style" />
+  <div class="timeline flex">
+    <EntityIcon
+      v-for="(entity, index) in state.timeline"
+      :key="`${entity.id}:${index}`"
+      :entity="entity"
+    />
   </div>
 </template>
 
 <style scoped lang="postcss">
 .timeline {
+  position: absolute;
+  top: var(--size-2);
+  left: 50%;
+  transform: translateX(-50%);
+
   width: calc(1px * v-bind(totalWidth));
-
-  > div {
-    position: relative;
-
-    aspect-ratio: 1;
-    width: 64px;
-
-    background-image: url('/assets/ui/timeline-item.png');
-    background-size: cover;
-    &::after {
-      content: '';
-
-      position: absolute;
-      inset: 0;
-
-      background-image: var(--bg);
-      background-position: var(--bg-position);
-
-      mask-image: url('/assets/ui/timeline-mask.png');
-    }
-  }
 }
 </style>

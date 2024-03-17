@@ -10,13 +10,6 @@ const screenViewport = shallowRef<Viewport>();
 
 const { state, fx } = useGame();
 
-// watchEffect(() => {
-//   if (gameObjectsLayer.value) {
-//     gameObjectsLayer.value.group.enableSort = true;
-//     gameObjectsLayer.value.sortableChildren = true;
-//   }
-// });
-
 const { camera } = useGame();
 
 useEventListener('keydown', e => {
@@ -58,8 +51,8 @@ const isoBoundingRect = computed(() => ({
 }));
 
 const WORLD_PADDING = {
-  x: CELL_WIDTH * 4,
-  y: CELL_HEIGHT * 5
+  x: CELL_WIDTH,
+  y: CELL_HEIGHT * 2
 };
 const worldSize = computed(() => ({
   width:
@@ -119,17 +112,17 @@ until(screenViewport)
         isoCenter.value.isoY + containerOffset.value.y - CELL_HEIGHT / 2
       );
 
-    setTimeout(() => {
-      screenViewport.value?.animate({
-        time: 1000,
-        ease: 'easeInOutCubic',
-        position: {
-          x: center.isoX + containerOffset?.value.x,
-          y: center.isoY + containerOffset.value.y
-        },
-        scale: 2
-      });
-    }, 800);
+    // setTimeout(() => {
+    //   screenViewport.value?.animate({
+    //     time: 1000,
+    //     ease: 'easeInOutCubic',
+    //     position: {
+    //       x: center.isoX + containerOffset?.value.x,
+    //       y: center.isoY + containerOffset.value.y
+    //     },
+    //     scale: 2
+    //   });
+    // }, 800);
   });
 </script>
 

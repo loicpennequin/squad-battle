@@ -6,3 +6,4 @@ export { Player, type PlayerId } from './player/player';
 export { Obstacle, type ObstacleId } from './obstacle/obstacle';
 export { GameMap } from './map/map';
 export { config } from './config';
+export { KEYWORDS, type Keyword } from './utils/keywords';

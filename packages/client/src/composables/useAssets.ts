@@ -32,7 +32,6 @@ export const useAssetsProvider = () => {
       Assets.loadBundle('fx'),
       Assets.loadBundle('hitboxes')
     ]);
-    console.log('loaded');
     loaded.value = true;
   };
 
