@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const { state } = useGame();
+const { state, ui } = useGame();
 </script>
 
 <template>
@@ -7,8 +7,17 @@ const { state } = useGame();
     <EntityIcon
       v-for="entity in state.players[0].entities"
       :key="entity.id"
-      size="lg"
-      :entity="entity"
+      :sprite-id="entity.blueprint.spriteId"
+      @mouseenter="
+        () => {
+          ui.hoverAt(entity.position);
+        }
+      "
+      @mouseleave="
+        () => {
+          ui.unhover();
+        }
+      "
     />
   </div>
 
@@ -16,8 +25,17 @@ const { state } = useGame();
     <EntityIcon
       v-for="entity in state.players[1].entities"
       :key="entity.id"
-      size="lg"
-      :entity="entity"
+      :sprite-id="entity.blueprint.spriteId"
+      @mouseenter="
+        () => {
+          ui.hoverAt(entity.position);
+        }
+      "
+      @mouseleave="
+        () => {
+          ui.unhover();
+        }
+      "
     />
   </div>
 </template>

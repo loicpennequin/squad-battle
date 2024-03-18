@@ -2,7 +2,7 @@
 import { onTick } from 'vue3-pixi';
 import { TextStyle, Ticker } from 'pixi.js';
 
-const { ui, fx, session, state } = useGame();
+const { ui, gameType, session, state } = useGame();
 const fps = ref<number[]>([60]);
 const HISTORY_LIMIT = 30;
 onTick(() => {
@@ -24,9 +24,11 @@ const style = new TextStyle({ fill: 'white', fontSize: 12, fontFamily: 'monospac
   <pixi-text :x="30" :y="30" :style="style">
     Targeting mode: {{ ui.targetingMode }}
   </pixi-text>
+  <pixi-text :x="30" :y="45" :style="style">Game type: {{ gameType }}</pixi-text>
+  <pixi-text :x="30" :y="60" :style="style">Phase: {{ state.phase }}</pixi-text>
   <pixi-text
     :x="30"
-    :y="45"
+    :y="75"
     :style="style"
     @click="
       () => {
@@ -37,8 +39,8 @@ const style = new TextStyle({ fill: 'white', fontSize: 12, fontFamily: 'monospac
     Debug session
   </pixi-text>
   <pixi-text
-    :x="30"
-    :y="60"
+    :x="130"
+    :y="75"
     :style="style"
     @click="
       () => {

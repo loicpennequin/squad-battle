@@ -85,11 +85,6 @@ const isoCenter = computed(() => {
 until(screenViewport)
   .not.toBe(undefined)
   .then(() => {
-    const center = toIso(
-      state.value.activeEntity.position,
-      camera.angle.value,
-      state.value.map
-    );
     screenViewport.value
       ?.drag({
         mouseButtons: 'right'

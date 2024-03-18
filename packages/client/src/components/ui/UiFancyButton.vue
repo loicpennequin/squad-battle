@@ -155,5 +155,12 @@ const tag = computed(() => {
       outline-offset: 5px;
     }
   }
+
+  :disabled {
+    --sat: 0%;
+    --sat2: 0%;
+
+    opacity: 0.7;
+  }
 }
 </style>

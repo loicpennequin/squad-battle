@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { isDefined } from '@game/shared';
 import type { Cell } from '@game/sdk';
 import { ColorOverlayFilter } from '@pixi/filter-color-overlay';
 import type { Filter } from 'pixi.js';
@@ -43,6 +44,8 @@ const isMovePathHighlighted = computed(() => {
   return isInPath || entityOnCell?.equals(state.value.activeEntity);
 });
 
+const inSkillAreaFilter = new ColorOverlayFilter(0xdd2233, 0.5);
+
 const filters = computed(() => {
   const result: Filter[] = [];
   if (fx.isPlaying.value) return result;
@@ -55,6 +58,17 @@ const filters = computed(() => {
     ui.targetingMode.value === TARGETING_MODES.BASIC
   ) {
     result.push(attackFilter);
+  }
+
+  if (
+    ui.selectedSkill.value?.isInAreaOfEffect(
+      session,
+      cell.position,
+      state.value.activeEntity,
+      [...ui.skillTargets.value, ui.hoveredCell.value?.position].filter(isDefined)
+    )
+  ) {
+    result.push(inSkillAreaFilter);
   }
   return result;
 });
@@ -101,7 +115,9 @@ const filters = computed(() => {
                 }
               })
               .otherwise(() => {
-                ui.switchTargetingMode(TARGETING_MODES.NONE);
+                if (state.phase === 'deploy') {
+                  ui.toggleCharacterDeployment(cell);
+                }
               });
           }
         "

@@ -1,10 +1,11 @@
 import type { Values, UnionToIntersection, Point3D } from '@game/shared';
-import type { EntityId, GameSession, GameState, SkillId } from '@game/sdk';
+import type { EntityId, GameSession, GameState, PlayerId, SkillId } from '@game/sdk';
 import type { AssetsContext } from './useAssets';
 import type { IsoCameraContext } from './useIsoCamera';
 import type { GameUiContext } from './useGameUi';
 import type { PathfindingContext } from './usePathfinding';
 import type { FxContext } from './useFx';
+import type { CharacterBlueprintId } from '@game/sdk/src/entity/character-blueprint';
 
 type ShortEmits<T extends Record<string, any>> = UnionToIntersection<
   Values<{
@@ -12,11 +13,21 @@ type ShortEmits<T extends Record<string, any>> = UnionToIntersection<
   }>
 >;
 
+export const GAME_TYPES = {
+  PVP: 'pvp',
+  SANDBOX: 'sandbox'
+} as const;
+
+export type GameType = Values<typeof GAME_TYPES>;
+
 export type GameEmits = {
   move: [Point3D];
   attack: [{ targetId: EntityId }];
   endTurn: [];
   useSkill: [{ skillId: SkillId; targets: Point3D[] }];
+  deploy: [
+    { characters: Array<{ position: Point3D; characterId: CharacterBlueprintId }> }
+  ];
   // surrender: [];
   // summon: [{ unitId: UnitId; position: Point3D; targets: Point3D[] }];
   // end: [{ winner: Player }];
@@ -31,23 +42,23 @@ export type GameContext = {
   pathfinding: PathfindingContext;
   dispatch: ShortEmits<GameEmits>;
   fx: FxContext;
+  gameType: GameType;
+  playerId: PlayerId | null;
 };
-
-// sendInput: (type, payload?) => {
-//       if (!toValue(isActivePlayer) && type !== 'surrender') return;
-//       // @ts-expect-error
-//       emit(type, payload);
-//       context.ui.targetMode.value = null;
-//       context.ui.selectedSkill.value = null;
-//       context.ui.selectedSummon.value = null;
-//       context.ui.summonSpawnPoint.value = null;
-//       context.ui.summonTargets.value.clear();
-//       context.ui.skillTargets.value.clear();
-//     }
 
 export const GAME_INJECTION_KEY = Symbol('game') as InjectionKey<GameContext>;
 
-export const useGameProvider = (session: GameSession, emit: ShortEmits<GameEmits>) => {
+export const useGameProvider = ({
+  session,
+  emit,
+  playerId,
+  gameType
+}: {
+  session: GameSession;
+  emit: ShortEmits<GameEmits>;
+  playerId: PlayerId | null;
+  gameType: GameType;
+}) => {
   const ui = useGameUiProvider(session, emit);
   const camera = useIsoCameraProvider();
   const assets = useAssetsProvider();
@@ -59,22 +70,8 @@ export const useGameProvider = (session: GameSession, emit: ShortEmits<GameEmits
   fx.provideSession(session);
   fx.provideUi(ui);
 
-  watch(
-    () => state.value.activeEntity.id,
-    () => {
-      // ui.unselect();
-    }
-  );
-
-  session.on('game:action', action => {
+  session.on('game:action', () => {
     state.value = session.getState();
-    // if (action.name === 'END_TURN') {
-    //   context.ui.selectedEntity.value = null;
-    //   context.ui.targetMode.value = null;
-    // }
-    // if (action.name === 'END_GAME') {
-    //   emit('end', { winner: session.playerManager.getPlayerById(session.winner!)! });
-    // }
   });
 
   onUnmounted(() => {
@@ -82,6 +79,8 @@ export const useGameProvider = (session: GameSession, emit: ShortEmits<GameEmits
   });
 
   const ctx: GameContext = {
+    playerId,
+    gameType,
     camera,
     assets,
     session,

@@ -2,9 +2,7 @@
 
 <template>
   <Timeline />
-
   <TeamInfos />
-
   <ActionBar />
 </template>
 

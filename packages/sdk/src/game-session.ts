@@ -42,11 +42,8 @@ export type SerializedGameState = {
   timeline: SerializedEntity[];
 };
 
-type EntityLifecycleEvent = 'created' | 'destroyed';
 type GlobalEntityEvents = {
-  [Event in
-    | EntityEvent
-    | EntityLifecycleEvent as `entity:${Event}`]: Event extends EntityEvent
+  [Event in EntityEvent as `entity:${Event}`]: Event extends EntityEvent
     ? EntityEventMap[Event]
     : Entity;
 };

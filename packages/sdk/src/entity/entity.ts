@@ -40,6 +40,9 @@ export const ENTITY_EVENTS = {
   BEFORE_USE_SKILL: 'before_use_skill',
   AFTER_USE_SKILL: 'after_use_skill',
 
+  BEFORE_ATTACK: 'before_attack',
+  AFTER_ATTACK: 'after_attack',
+
   TURN_STARTED: 'turn-started',
   TURN_ENDED: 'turn-ended'
 } as const;
@@ -56,6 +59,15 @@ type TakeDamageEvent = {
   source: Nullable<Entity>;
   amount: number;
 };
+type UseSkillEvent = {
+  entity: Entity;
+  targets: Point3D[];
+  skill: Skill;
+};
+type AttackEvent = {
+  entity: Entity;
+  target: Entity;
+};
 
 export type EntityEventMap = {
   [ENTITY_EVENTS.CREATED]: [entity: Entity];
@@ -69,6 +81,12 @@ export type EntityEventMap = {
 
   [ENTITY_EVENTS.BEFORE_TAKE_DAMAGE]: [event: TakeDamageEvent];
   [ENTITY_EVENTS.AFTER_TAKE_DAMAGE]: [event: TakeDamageEvent];
+
+  [ENTITY_EVENTS.BEFORE_USE_SKILL]: [event: UseSkillEvent];
+  [ENTITY_EVENTS.AFTER_USE_SKILL]: [event: UseSkillEvent];
+
+  [ENTITY_EVENTS.BEFORE_ATTACK]: [event: AttackEvent];
+  [ENTITY_EVENTS.AFTER_ATTACK]: [event: AttackEvent];
 
   [ENTITY_EVENTS.TURN_STARTED]: [entity: Entity];
   [ENTITY_EVENTS.TURN_ENDED]: [entity: Entity];
@@ -369,14 +387,17 @@ export class Entity extends EventEmitter<EntityEventMap> implements Serializable
   }
 
   async performAttack(target: Entity) {
+    this.emit(ENTITY_EVENTS.BEFORE_ATTACK, { entity: this, target });
     await this.session.fxSystem.attack(this.id, target.id);
     this.dealDamage(this.attack, target);
     this.actionsTaken++;
+    this.emit(ENTITY_EVENTS.AFTER_ATTACK, { entity: this, target });
   }
 
   async useSkill(skill: Skill, targets: Point3D[]) {
     this.ap -= skill.apCost;
     this.actionsTaken++;
+    this.emit(ENTITY_EVENTS.BEFORE_USE_SKILL, { entity: this, skill, targets });
     await skill.execute(
       this.session,
       this,
@@ -385,6 +406,7 @@ export class Entity extends EventEmitter<EntityEventMap> implements Serializable
         skill.isInAreaOfEffect(this.session, cell, this, targets)
       )
     );
+    this.emit(ENTITY_EVENTS.AFTER_USE_SKILL, { entity: this, skill, targets });
   }
 
   isAlly(entityId: EntityId) {

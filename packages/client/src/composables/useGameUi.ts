@@ -5,6 +5,7 @@ import type { DisplayObject } from 'pixi.js';
 import { match } from 'ts-pattern';
 import type { InjectionKey } from 'vue';
 import type { GameContext } from './useGame';
+import type { CharacterBlueprintId } from '@game/sdk/src/entity/character-blueprint';
 
 export const TARGETING_MODES = {
   NONE: 'NONE',
@@ -16,11 +17,13 @@ type TargetingMode = Values<typeof TARGETING_MODES>;
 type LayerName = 'ui' | 'scene';
 
 export type GameUiContext = {
+  selectedBlueprintId: Ref<Nullable<CharacterBlueprintId>>;
   hoveredCell: ComputedRef<Nullable<Cell>>;
   hoveredEntity: ComputedRef<Nullable<Entity>>;
   selectedSkill: Ref<Nullable<Skill>>;
   targetingMode: Ref<TargetingMode>;
   skillTargets: Ref<Point3D[]>;
+  currentDeployment: Ref<Array<{ position: Point3D; characterId: CharacterBlueprintId }>>;
   hoverAt(point: Point3D): void;
   unhover(): void;
   selectSkill(skill: Skill): void;
@@ -29,6 +32,7 @@ export type GameUiContext = {
   switchTargetingMode(mode: TargetingMode): void;
   registerLayer(layer: Layer, name: LayerName): void;
   assignLayer(obj: Nullable<DisplayObject>, layer: LayerName): void;
+  toggleCharacterDeployment(point: Point3D): void;
 };
 
 const GAME_UI_INJECTION_KEY = Symbol('iso-camera') as InjectionKey<GameUiContext>;
@@ -45,6 +49,11 @@ export const useGameUiProvider = (
     ui: ref(),
     scene: ref()
   };
+  const selectedBlueprintId = ref<Nullable<CharacterBlueprintId>>();
+  const currentDeployment = ref<
+    Array<{ position: Point3D; characterId: CharacterBlueprintId }>
+  >([]);
+
   session.on('entity:turn-ended', () => {
     api.switchTargetingMode(TARGETING_MODES.NONE);
   });
@@ -115,6 +124,42 @@ export const useGameUiProvider = (
         api.switchTargetingMode(TARGETING_MODES.BASIC);
       }
     },
+    toggleCharacterDeployment() {
+      if (!selectedBlueprintId.value) return;
+      if (!hoveredPosition.value) return;
+
+      const deployedUnitAtPoint = currentDeployment.value.find(({ position }) =>
+        Vec3.fromPoint3D(hoveredPosition.value!).equals(position)
+      );
+
+      if (!deployedUnitAtPoint) {
+        currentDeployment.value = currentDeployment.value
+          .filter(element => element.characterId !== selectedBlueprintId.value)
+          .concat({
+            characterId: selectedBlueprintId.value,
+            position: hoveredPosition.value
+          });
+        selectedBlueprintId.value = null;
+        return;
+      }
+
+      if (deployedUnitAtPoint.characterId === selectedBlueprintId.value) {
+        selectedBlueprintId.value = null;
+        return;
+      }
+      const temp = deployedUnitAtPoint.characterId;
+      deployedUnitAtPoint.characterId = selectedBlueprintId.value;
+
+      const existing = currentDeployment.value.find(
+        ({ characterId }) => characterId === selectedBlueprintId.value
+      );
+      if (existing) {
+        existing.characterId = temp;
+      }
+      selectedBlueprintId.value = null;
+    },
+    currentDeployment,
+    selectedBlueprintId,
     skillTargets,
     targetingMode,
     selectedSkill

@@ -5,7 +5,7 @@ import { OutlineFilter } from '@pixi/filter-outline';
 import { ColorOverlayFilter } from '@pixi/filter-color-overlay';
 import { AdvancedBloomFilter } from '@pixi/filter-advanced-bloom';
 import type { Entity } from '@game/sdk';
-import { Color, Container, type Filter } from 'pixi.js';
+import { Container, type Filter } from 'pixi.js';
 import { Hitbox } from '~/utils/hitbox';
 import { match } from 'ts-pattern';
 
@@ -17,6 +17,7 @@ const textures = computed(() => {
   const sheet = assets.getSpritesheet(entity.blueprint.spriteId);
   return createSpritesheetFrameObject('idle', sheet);
 });
+
 const activeTexture = computed(() => {
   const sheet = assets.getSpritesheet('selected-unit');
   return createSpritesheetFrameObject('idle', sheet);

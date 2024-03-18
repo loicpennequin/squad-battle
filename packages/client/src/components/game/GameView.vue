@@ -20,6 +20,7 @@ const { state, ui } = useGame();
         :obstacle="obstacle"
       />
       <Entity v-for="entity in state.entities" :key="entity.id" :entity="entity" />
+      <DeployPreview />
     </Layer>
   </Camera>
 

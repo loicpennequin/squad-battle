@@ -46,7 +46,7 @@ const state: SerializedGameState = {
           z: 0
         },
         terrain: y > 7 ? 'water' : 'ground',
-        availableForDeploy: null
+        availableForDeploy: x < 2 ? 0 : x > 7 ? 1 : null
       }))
     )
       .concat(
@@ -58,7 +58,7 @@ const state: SerializedGameState = {
               z: 1
             },
             terrain: 'ground',
-            availableForDeploy: null
+            availableForDeploy: x < 2 ? 0 : x > 7 ? 1 : null
           }))
         )
       )
@@ -69,62 +69,56 @@ const state: SerializedGameState = {
     {
       id: '1',
       name: 'Player 1',
-      team: [],
-      deployment: [
-        {
-          characterId: 'test',
-          position: { x: 3, y: 4, z: 1 }
-        },
-        {
-          characterId: 'test3',
-          position: { x: 4, y: 4, z: 1 }
-        }
-      ]
+      team: ['test', 'test2'],
+      deployment: null
     },
     {
       id: '2',
       name: 'Player 2',
-      team: [],
-      deployment: [
-        {
-          characterId: 'test2',
-          position: { x: 5, y: 5, z: 0 }
-        },
-        {
-          characterId: 'test4',
-          position: { x: 6, y: 6, z: 0 }
-        }
-      ]
+      team: ['test3', 'test4'],
+      deployment: null
     }
   ]
 };
 
 const fx = useFXProvider();
 const session = GameSession.createClientSession(state, 'seed', fx.ctx);
-session.onReady(() => {
-  session.transitionToBattle();
-});
 
 const dispatch = (
   type: Parameters<(typeof session)['dispatch']>[0]['type'],
   payload: any
 ) => {
-  session.dispatch({
-    type,
-    payload: {
-      ...payload,
-      playerId: session.atbSystem.activeEntity.player.id
-    }
-  });
+  if (session.phase === 'deploy') {
+    const players = session.playerSystem.getList();
+    const idx = players[0].deployment ? 1 : 0;
+    session.dispatch({
+      type,
+      payload: {
+        ...payload,
+        playerId: players[idx].id
+      }
+    });
+  } else {
+    session.dispatch({
+      type,
+      payload: {
+        ...payload,
+        playerId: session.atbSystem.activeEntity.player.id
+      }
+    });
+  }
 };
 </script>
 
 <template>
   <Game
     :game-session="session"
+    :player-id="null"
+    :game-type="GAME_TYPES.SANDBOX"
     @move="dispatch('move', $event)"
     @attack="dispatch('attack', $event)"
     @end-turn="dispatch('endTurn', $event)"
     @use-skill="dispatch('useSkill', $event)"
+    @deploy="dispatch('deploy', $event)"
   />
 </template>

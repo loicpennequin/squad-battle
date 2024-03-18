@@ -48,6 +48,7 @@ export class ATBSystem {
   }
 
   getTimeline(entities: Entity[], length: number) {
+    if (this.session.phase === 'deploy') return [];
     const timeline: Entity[] = [];
 
     const clones = entities.map(entity => entity.clone());

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const { state } = useGame();
+const { state, ui } = useGame();
 
 const totalWidth = computed(() => state.value.timeline.length * 64);
 </script>
@@ -9,7 +9,17 @@ const totalWidth = computed(() => state.value.timeline.length * 64);
     <EntityIcon
       v-for="(entity, index) in state.timeline"
       :key="`${entity.id}:${index}`"
-      :entity="entity"
+      :sprite-id="entity.blueprint.spriteId"
+      @mouseenter="
+        () => {
+          ui.hoverAt(entity.position);
+        }
+      "
+      @mouseleave="
+        () => {
+          ui.unhover();
+        }
+      "
     />
   </div>
 </template>
