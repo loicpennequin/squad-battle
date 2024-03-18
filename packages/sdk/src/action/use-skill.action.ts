@@ -38,7 +38,7 @@ export class UseSkillAction extends GameAction<typeof schema> {
     );
 
     if (!canUse) {
-      throw new Error('Skill cnanot be used.');
+      throw new Error('Skill cannot be used.');
     }
 
     await this.session.atbSystem.activeEntity.useSkill(skill, this.payload.targets);

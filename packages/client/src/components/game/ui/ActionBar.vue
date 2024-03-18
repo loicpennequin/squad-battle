@@ -8,7 +8,9 @@ const { dispatch, ui, state } = useGame();
       v-for="skill in state.activeEntity.skills"
       :key="skill.id"
       class="skill-button"
+      :class="{ selected: ui.selectedSkill.value?.id === skill.id }"
       :style="{ '--bg': `url('/assets/skills/${skill.iconId}.png')` }"
+      :disabled="!state.activeEntity.canUseSkill(skill)"
       @click="ui.selectSkill(skill)"
     />
     <UiFancyButton
@@ -42,5 +44,15 @@ const { dispatch, ui, state } = useGame();
   background: var(--bg);
   background-size: cover;
   border: solid 3px black;
+
+  transition: transform 0.2s;
+  &.selected {
+    transform: scale(1.05);
+    outline: solid 2px var(--primary);
+  }
+
+  &:disabled {
+    filter: grayscale(100%);
+  }
 }
 </style>

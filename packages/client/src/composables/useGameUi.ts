@@ -1,9 +1,10 @@
 import type { Cell, Entity, GameSession, Skill } from '@game/sdk';
-import type { Nullable, Point3D, Values } from '@game/shared';
+import { Vec3, type Nullable, type Point3D, type Values } from '@game/shared';
 import type { Layer } from '@pixi/layers';
 import type { DisplayObject } from 'pixi.js';
 import { match } from 'ts-pattern';
 import type { InjectionKey } from 'vue';
+import type { GameContext } from './useGame';
 
 export const TARGETING_MODES = {
   NONE: 'NONE',
@@ -23,6 +24,7 @@ export type GameUiContext = {
   hoverAt(point: Point3D): void;
   unhover(): void;
   selectSkill(skill: Skill): void;
+  toggleSkillTarget(point: Point3D): void;
   unselectSkill(): void;
   switchTargetingMode(mode: TargetingMode): void;
   registerLayer(layer: Layer, name: LayerName): void;
@@ -31,7 +33,10 @@ export type GameUiContext = {
 
 const GAME_UI_INJECTION_KEY = Symbol('iso-camera') as InjectionKey<GameUiContext>;
 
-export const useGameUiProvider = (session: GameSession) => {
+export const useGameUiProvider = (
+  session: GameSession,
+  dispatch: GameContext['dispatch']
+) => {
   const hoveredPosition = ref<Nullable<Point3D>>(null);
   const targetingMode = ref<TargetingMode>(TARGETING_MODES.NONE);
   const selectedSkill = ref<Nullable<Skill>>();
@@ -72,9 +77,11 @@ export const useGameUiProvider = (session: GameSession) => {
     switchTargetingMode(mode) {
       match(mode)
         .with(TARGETING_MODES.NONE, () => {
+          selectedSkill.value = null;
           targetingMode.value = mode;
         })
         .with(TARGETING_MODES.BASIC, () => {
+          selectedSkill.value = null;
           targetingMode.value = mode;
         })
         .with(TARGETING_MODES.SKILL, () => {
@@ -92,6 +99,21 @@ export const useGameUiProvider = (session: GameSession) => {
       selectedSkill.value = null;
       api.switchTargetingMode(TARGETING_MODES.NONE);
       skillTargets.value = [];
+    },
+    toggleSkillTarget(point) {
+      const idx = skillTargets.value.findIndex(pt => Vec3.fromPoint3D(pt).equals(point));
+      if (idx === -1) {
+        skillTargets.value.push(point);
+      } else {
+        skillTargets.value.splice(idx, 1);
+      }
+      if (skillTargets.value.length === selectedSkill.value?.maxTargets) {
+        dispatch('useSkill', {
+          skillId: selectedSkill.value.id,
+          targets: skillTargets.value
+        });
+        api.switchTargetingMode(TARGETING_MODES.BASIC);
+      }
     },
     skillTargets,
     targetingMode,

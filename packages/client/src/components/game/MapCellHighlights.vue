@@ -145,7 +145,6 @@ const { autoDestroyRef } = useAutoDestroy();
       event-mode="none"
     >
       <sprite :texture="skillTargetTexture" :anchor="0.5" />
-      <pixi-text :scale="0.5" :anchor="0.5">{{ skillTargetBitmask }}</pixi-text>
     </container>
   </PTransition>
 </template>

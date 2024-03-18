@@ -1,15 +1,17 @@
 <script setup lang="ts">
+import { isDefined } from '@game/shared';
 import { PTransition } from 'vue3-pixi';
 import { OutlineFilter } from '@pixi/filter-outline';
+import { ColorOverlayFilter } from '@pixi/filter-color-overlay';
 import { AdvancedBloomFilter } from '@pixi/filter-advanced-bloom';
 import type { Entity } from '@game/sdk';
-import { Container, type Filter } from 'pixi.js';
+import { Color, Container, type Filter } from 'pixi.js';
 import { Hitbox } from '~/utils/hitbox';
 import { match } from 'ts-pattern';
 
 const { entity } = defineProps<{ entity: Entity }>();
 
-const { camera, assets, state, ui, fx, dispatch } = useGame();
+const { session, camera, assets, state, ui, fx, dispatch } = useGame();
 
 const textures = computed(() => {
   const sheet = assets.getSpritesheet(entity.blueprint.spriteId);
@@ -47,13 +49,7 @@ watchEffect(() => {
   });
 });
 
-watchEffect(() => {
-  hoveredFilters[1].color =
-    ui.targetingMode.value === TARGETING_MODES.BASIC &&
-    state.value.activeEntity.isEnemy(entity.id)
-      ? 0xff0000
-      : 0xffffff;
-});
+const inSkillAreaFilter = new ColorOverlayFilter(0xdd2233, 0.5);
 
 const filters = computed(() => {
   const result: Filter[] = [];
@@ -62,6 +58,16 @@ const filters = computed(() => {
   }
   if (isActive.value) {
     result.push(activeFilter);
+  }
+  if (
+    ui.selectedSkill.value?.isInAreaOfEffect(
+      session,
+      entity.position,
+      state.value.activeEntity,
+      [...ui.skillTargets.value, ui.hoveredCell.value?.position].filter(isDefined)
+    )
+  ) {
+    result.push(inSkillAreaFilter);
   }
   return result;
 });
@@ -126,7 +132,7 @@ const onPointerup = () => {
           ui.skillTargets.value
         )
       ) {
-        ui.skillTargets.value.push(entity.position);
+        ui.toggleSkillTarget(entity.position);
       } else {
         ui.switchTargetingMode(TARGETING_MODES.NONE);
       }

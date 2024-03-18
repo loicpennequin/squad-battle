@@ -125,5 +125,6 @@ const dispatch = (
     @move="dispatch('move', $event)"
     @attack="dispatch('attack', $event)"
     @end-turn="dispatch('endTurn', $event)"
+    @use-skill="dispatch('useSkill', $event)"
   />
 </template>

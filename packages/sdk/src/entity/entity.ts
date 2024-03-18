@@ -239,21 +239,24 @@ export class Entity extends EventEmitter<EntityEventMap> implements Serializable
   canUseSkillAt(skill: Skill, point: Point3D, otherTargets: Point3D[]) {
     if (!this.hasSkill(skill.id)) return false;
 
-    if (otherTargets.length === skill.maxTargets) return false;
-
     return skill.isTargetable(this.session, point, this, otherTargets);
   }
 
-  canUseSkill(skill: Skill, targets: Point3D[]) {
+  canUseSkill(skill: Skill, targets?: Point3D[]) {
     if (this.actionsTaken >= 1) return false;
     if (!this.hasSkill(skill.id)) return false;
-    if (targets.length < skill.minTargets) return false;
-    if (targets.length > skill.maxTargets) return false;
     if (this.ap < skill.apCost) return false;
 
-    return targets.every(target =>
-      skill.isTargetable(this.session, target, this, targets)
-    );
+    if (targets) {
+      if (targets.length < skill.minTargets) return false;
+      if (targets.length > skill.maxTargets) return false;
+
+      return targets.every(target =>
+        skill.isTargetable(this.session, target, this, targets)
+      );
+    }
+
+    return true;
   }
 
   canAttackAt(point: Point3D, simulatedPosition?: Point3D) {

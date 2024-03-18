@@ -6,6 +6,7 @@ import { DeployAction } from './deploy.action';
 import { EndTurnAction } from './end-turn.action';
 import { MoveAction } from './move.action';
 import { StartBattleAction } from './start-battle.action';
+import { UseSkillAction } from './use-skill.action';
 
 type GenericActionMap = Record<string, Constructor<GameAction<DefaultSchema>>>;
 
@@ -25,7 +26,8 @@ const actionMap = validateActionMap({
   deploy: DeployAction,
   endTurn: EndTurnAction,
   move: MoveAction,
-  startBattle: StartBattleAction
+  startBattle: StartBattleAction,
+  useSkill: UseSkillAction
 });
 
 export class ActionSystem implements Serializable {

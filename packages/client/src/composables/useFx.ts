@@ -91,7 +91,11 @@ export const useFXProvider = () => {
       });
     });
   };
+
   const ctx: FXSystem = {
+    fadeOutEntity() {
+      return Promise.resolve();
+    },
     displayText(...args) {
       return executeCommand(ctx => {
         displayText(ctx, ...args);

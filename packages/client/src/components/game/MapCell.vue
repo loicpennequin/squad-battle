@@ -95,7 +95,7 @@ const filters = computed(() => {
                     ui.skillTargets.value
                   )
                 ) {
-                  ui.skillTargets.value.push(cell.position);
+                  ui.toggleSkillTarget(cell.position);
                 } else {
                   ui.switchTargetingMode(TARGETING_MODES.NONE);
                 }

@@ -48,7 +48,7 @@ export type GameContext = {
 export const GAME_INJECTION_KEY = Symbol('game') as InjectionKey<GameContext>;
 
 export const useGameProvider = (session: GameSession, emit: ShortEmits<GameEmits>) => {
-  const ui = useGameUiProvider(session);
+  const ui = useGameUiProvider(session, emit);
   const camera = useIsoCameraProvider();
   const assets = useAssetsProvider();
   const pathfinding = usePathfindingProvider(session);
