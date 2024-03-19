@@ -53,5 +53,5 @@ export type Skill = {
     caster: Entity,
     targets: Point3D[],
     affectedCells: Cell[]
-  ): Promise<void>;
+  ): Promise<any>;
 };

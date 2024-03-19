@@ -13,12 +13,10 @@ const PATHFINDING_INJECTION_KEY = Symbol(
 ) as InjectionKey<PathfindingContext>;
 
 export const usePathfindingProvider = (session: GameSession) => {
-  const apCache = new Map<EntityId, DistanceMap>();
-  const maxApCache = new Map<EntityId, DistanceMap>();
+  const cache = new Map<EntityId, DistanceMap>();
 
   session.on('game:action', () => {
-    apCache.clear();
-    maxApCache.clear();
+    cache.clear();
   });
 
   const api: PathfindingContext = {
@@ -26,11 +24,11 @@ export const usePathfindingProvider = (session: GameSession) => {
       return session.map.getPathTo(entity, to, maxDistance)?.path;
     },
     canMoveTo(entity, point) {
-      if (!apCache.has(entity.id)) {
-        const dm = session.map.getDistanceMap(entity.position, entity.ap);
-        apCache.set(entity.id, dm);
+      if (!cache.has(entity.id)) {
+        const dm = session.map.getDistanceMap(entity.position, entity.speed);
+        cache.set(entity.id, dm);
       }
-      const distanceMap = apCache.get(entity.id)!;
+      const distanceMap = cache.get(entity.id)!;
 
       return entity.canMove(distanceMap.get(point));
     },
@@ -49,11 +47,11 @@ export const usePathfindingProvider = (session: GameSession) => {
       //   );
       // });
 
-      if (!maxApCache.has(entity.id)) {
+      if (!cache.has(entity.id)) {
         const dm = session.map.getDistanceMap(entity.position, entity.maxAp);
-        maxApCache.set(entity.id, dm);
+        cache.set(entity.id, dm);
       }
-      const distanceMap = maxApCache.get(entity.id)!;
+      const distanceMap = cache.get(entity.id)!;
       const neighbors = session.map.getNeighborsDestinations(point);
       const canAttack = neighbors.some(
         neighbor =>

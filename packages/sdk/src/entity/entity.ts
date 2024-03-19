@@ -8,6 +8,7 @@ import { Interceptable, ReactiveValue, type inferInterceptor } from '../utils/he
 import { isAlly, isEnemy } from './entity-utils';
 import { isWithinCells } from '../utils/targeting';
 import type { Skill, SkillId } from '../skill/skill';
+import type { Modifier, ModifierId } from '../modifier/modifier';
 
 export type EntityId = number;
 
@@ -101,6 +102,8 @@ export class Entity extends EventEmitter<EntityEventMap> implements Serializable
 
   readonly id: EntityId;
 
+  modifiers: Modifier[] = [];
+
   position: Vec3;
 
   atbSeed = 0;
@@ -156,7 +159,7 @@ export class Entity extends EventEmitter<EntityEventMap> implements Serializable
   clone() {
     const clone = new Entity(this.session, this.serialize());
     clone.interceptors = this.interceptors;
-
+    clone.modifiers = this.modifiers;
     return clone;
   }
 
@@ -211,7 +214,7 @@ export class Entity extends EventEmitter<EntityEventMap> implements Serializable
   }
 
   get speed(): number {
-    return this.interceptors.attack.getValue(this.blueprint.speed, this);
+    return this.interceptors.speed.getValue(this.blueprint.speed, this);
   }
 
   get initiative(): number {
@@ -261,13 +264,23 @@ export class Entity extends EventEmitter<EntityEventMap> implements Serializable
   }
 
   canUseSkill(skill: Skill, targets?: Point3D[]) {
-    if (this.actionsTaken >= 1) return false;
-    if (!this.hasSkill(skill.id)) return false;
-    if (this.ap < skill.apCost) return false;
+    if (this.actionsTaken >= 1) {
+      return false;
+    }
+    if (!this.hasSkill(skill.id)) {
+      return false;
+    }
+    if (this.ap < skill.apCost) {
+      return false;
+    }
 
     if (targets) {
-      if (targets.length < skill.minTargets) return false;
-      if (targets.length > skill.maxTargets) return false;
+      if (targets.length < skill.minTargets) {
+        return false;
+      }
+      if (targets.length > skill.maxTargets) {
+        return false;
+      }
 
       return targets.every(target =>
         skill.isTargetable(this.session, target, this, targets)
@@ -407,6 +420,41 @@ export class Entity extends EventEmitter<EntityEventMap> implements Serializable
       )
     );
     this.emit(ENTITY_EVENTS.AFTER_USE_SKILL, { entity: this, skill, targets });
+  }
+
+  getModifier(id: ModifierId) {
+    return this.modifiers.find(m => m.id === id);
+  }
+
+  addModifier(modifier: Modifier) {
+    const existing = this.getModifier(modifier.id);
+    if (existing) {
+      if (existing.stackable) {
+        existing.stacks++;
+      } else {
+        existing.onReapply(this.session, this);
+      }
+    }
+
+    this.modifiers.push(modifier);
+    modifier.onApplied(this.session, this);
+  }
+
+  removeModifier(modifierId: ModifierId, ignoreStacks = false) {
+    this.modifiers.forEach(mod => {
+      if (mod.id !== modifierId) return;
+
+      if (mod.stackable && mod.stacks > 1 && !ignoreStacks) return;
+      mod.onRemoved(this.session, this);
+    });
+
+    this.modifiers = this.modifiers.filter(mod => {
+      if (mod.id !== modifierId) return true;
+
+      if (mod.stackable && mod.stacks > 1 && !ignoreStacks) return true;
+
+      return false;
+    });
   }
 
   isAlly(entityId: EntityId) {

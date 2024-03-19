@@ -71,7 +71,7 @@ const canDeploy = computed(
   > label {
     cursor: pointer;
     aspect-ratio: 1;
-    width: 128px;
+    width: 64px;
 
     &:focus-within {
       filter: brightness(120%);
