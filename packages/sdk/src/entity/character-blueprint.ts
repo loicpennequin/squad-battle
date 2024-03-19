@@ -1,8 +1,9 @@
 import { keyBy } from 'lodash-es';
 import type { Skill } from '../skill/skill';
-import { isAxisAligned, isSelf } from '../utils/targeting';
+import { isAxisAligned, isSelf, isWithinCells } from '../utils/targeting';
 import { Vec3, isDefined } from '@game/shared';
 import type { Modifier } from '../modifier/modifier';
+import { KEYWORDS } from '../utils/keywords';
 
 export type CharacterBlueprintId = string;
 export type CharacterBlueprint = {
@@ -97,7 +98,6 @@ const characters: CharacterBlueprint[] = [
               caster.addInterceptor('speed', interceptor);
               const listener = () => {
                 duration--;
-                console.log('turn ended', duration);
                 if (duration === 0) {
                   caster.off('turn-ended', listener);
                   caster.removeModifier('swiftness');
@@ -106,7 +106,6 @@ const characters: CharacterBlueprint[] = [
               caster.on('turn-ended', listener);
             },
             onRemoved() {
-              console.log('on removed');
               caster.removeInterceptor('speed', interceptor);
             },
             onReapply() {
@@ -177,6 +176,57 @@ const characters: CharacterBlueprint[] = [
               }
             })
           );
+        }
+      },
+      {
+        apCost: 3,
+        id: 'chakram_dance',
+        name: 'Chakram Dance',
+        keywords: [KEYWORDS.ELUSIVE],
+        getDescription: () =>
+          'Deal 3 damage to nearby enemies and gain elusive for one turn',
+        iconId: 'chakram-dance',
+        isTargetable(session, point, caster) {
+          return isSelf(caster, session.entitySystem.getEntityAt(point));
+        },
+        isWithinRange(session, point, caster) {
+          return isWithinCells(caster.position, point, 1);
+        },
+        isInAreaOfEffect(session, point, caster) {
+          return isWithinCells(caster.position, point, 1);
+        },
+        minTargets: 1,
+        maxTargets: 1,
+        async execute(session, caster) {
+          const nearby = session.entitySystem
+            .getNearbyEntities(caster.position)
+            .filter(entity => caster.isEnemy(entity.id));
+          await Promise.all(nearby.map(entity => caster.dealDamage(3, entity)));
+
+          const interceptor = () => false;
+          caster.addModifier({
+            keywords: [],
+            id: 'elusive',
+            name: 'Elusive',
+            iconId: 'nimble',
+            getDescription() {
+              return 'Cannot be attacked.';
+            },
+            onApplied() {
+              caster.addInterceptor('canBeAttackTarget', interceptor);
+              const listener = () => {
+                caster.off('turn-started', listener);
+                caster.removeModifier('elusive');
+              };
+              caster.on('turn-started', listener);
+            },
+            onRemoved() {
+              console.log('on removed');
+              caster.removeInterceptor('canBeAttackTarget', interceptor);
+            },
+            onReapply: () => Promise.resolve(),
+            stackable: false
+          });
         }
       }
     ]

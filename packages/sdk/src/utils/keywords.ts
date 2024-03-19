@@ -54,14 +54,6 @@ export const KEYWORDS = {
     name: 'Thorns(x)',
     description: 'Enemies unit dealing damage to this unit take X damage.'
   },
-  SUMMON: {
-    name: 'Summon',
-    description: 'Triggers when the unit enters the battlefield.'
-  },
-  LAST_WILL: {
-    name: 'Last will',
-    description: 'Triggers when the unit is destroyed.'
-  },
   PLUNDER: {
     name: 'Plunder(x)',
     description: 'Gain X gold when the condition is met.'
@@ -78,24 +70,16 @@ export const KEYWORDS = {
     name: 'Barrier',
     description: 'Prevents the next source of damage dealt to this unit.'
   },
+  ELUSIVE: {
+    name: 'Elusive',
+    description: 'Cannot be attacked'
+  },
   LONE_WOLF: {
     name: 'Lone wolf',
     description: 'Triggers when this unit has no nearby allies.'
   },
-  FERVOR: {
-    name: 'Fervor',
-    description: 'Triggers when this unit is nearby its general.'
-  },
   AURA: {
     name: 'Aura',
     description: 'Apply the effect to all nearby units.'
-  },
-  SLAY: {
-    name: 'Slay',
-    description: 'Triggers when this unit destroys another one.'
-  },
-  DEATHWATCH: {
-    name: 'Deathwatch',
-    description: 'Triggers whenever a unit is destroyed.'
   }
 } satisfies Record<string, Keyword>;
